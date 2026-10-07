@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from agri.config import default_config, load_config
+from agri.model_check import model_report_path, validate_model
 from agri.source_registry import (
     LICENSE_PATH, SOURCE_PATH, initialize_registries, inspect_sources,
 )
@@ -123,4 +124,14 @@ def status(root: Path) -> dict[str, Any]:
         })
         report["resource_usage"]["cpu"] = "Tokenizer validation only; no neural training"
         report["resource_usage"]["storage"] += f"; tokenizer artifacts: {tokenizer['storage_bytes']} bytes"
+    if config is not None and model_report_path(root).exists():
+        model = validate_model(root)
+        report.update({
+            "phase": 5, "phase5_status": model["status"], "scope": model["scope"],
+            "model": model["model"], "model_check": model, "training": model["training"],
+            "metrics": {"packing": model["packing_metrics"], "mechanics": model["checks"], "model_quality": None},
+            "next_required_step": model["next_required_step"],
+        })
+        report["resource_usage"]["cpu"] = "Read-only artifact/provenance validation; model not initialized"
+        report["resource_usage"]["storage"] += f"; model check report: {model['storage_bytes']} bytes"
     return report

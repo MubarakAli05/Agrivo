@@ -1,6 +1,6 @@
 # AgriMini v0
 
-An agricultural AI **proof-of-working**, implemented in reviewed phases. **Phases 1–4 are implemented:** repository/configuration, non-destructive setup/status, a validated source/license registry, tiny synthetic soil/plant-metadata/QA fixtures, and custom text/structured tokenizers. Official source pages were inspected on 2026-10-07; no external datasets were ingested. Retrieval adapters, transformer training, image analysis, live question answering, and the dashboard are not implemented yet. There are no trained neural weights or model evaluation metrics.
+An agricultural AI **proof-of-working**, implemented in reviewed phases. **Phases 1–5 are implemented:** repository/configuration, non-destructive setup/status, a validated source/license registry, tiny synthetic soil/plant-metadata/QA fixtures, custom text/structured tokenizers, and a manually implemented PyTorch transformer with intact context packing and CPU mechanics checks. Official source pages were inspected on 2026-10-07; no external datasets were ingested. Retrieval adapters, transformer training, image analysis, live question answering, and the dashboard are not implemented yet. There are no trained neural weights or model evaluation metrics.
 
 The existing soil tokenizer remains unchanged and usable independently (see below).
 
@@ -23,11 +23,11 @@ The directory scaffold includes application/API/dashboard, raw/processed/indexed
 
 ### Configuration and resource policy
 
-[Configuration validation](agri/config.py) rejects unknown or missing keys, malformed types, incompatible attention dimensions, and pretrained-model settings. Defaults are offline, CPU, seed 42, and a planned randomly initialized 4-layer/256-hidden/4-head transformer with vocabulary 2,048 and context 256. Training defaults specify a 20-step, one-epoch, batch-size-two dry run with checkpoints every ten steps. These are **future trainer settings**, not measured results or an implemented training/resource guard.
+[Configuration validation](agri/config.py) rejects unknown or missing keys, malformed types, incompatible attention dimensions, and pretrained-model settings. Defaults are offline, CPU, seed 42, and a randomly initialized 4-layer/256-hidden/4-head transformer. The tokenizer vocabulary budget is 2,048; the model uses the actual fitted vocabulary. Phase 5 raises the context from 256 to **1,536**, as explicitly selected, to preserve each current QA example plus structured evidence intact. Training defaults specify a 20-step, one-epoch, batch-size-two dry run with checkpoints every ten steps. These are **future trainer settings**, not measured results or an implemented training/resource guard.
 
 Setup never accesses the network, installs PyTorch, creates credentials, downloads datasets/checkpoints, or starts training. Later training phases must first report dataset size, storage, GPU memory, expected duration, checkpoint frequency, epochs, and data sufficiency, then pass a tiny dry run before any approved larger run. Source ingestion must wait for source inspection and license approval. Keep credentials out of configuration and version control.
 
-Available commands are `setup`, `status`, `inspect-sources`, `generate-synthetic`, `validate-data`, `train-tokenizer`, and `validate-tokenizer`. Later commands are deliberately unavailable rather than returning simulated results. Status reports layout, external-source review, fixture validation, and (when trained artifacts exist) tokenizer validation separately. Overall status remains YELLOW while external approvals are pending, even when Phases 3–4 are GREEN; none proves end-to-end model success.
+Available commands are `setup`, `status`, `inspect-sources`, `generate-synthetic`, `validate-data`, `train-tokenizer`, `validate-tokenizer`, `check-model`, and `validate-model`. Later commands are deliberately unavailable rather than returning simulated results. Status reports layout, external-source review, fixture validation, tokenizer validation, and recorded model checks separately when their artifacts exist. Overall status remains YELLOW while external approvals are pending, even when Phases 3–5 are GREEN; none proves end-to-end model success.
 
 ## Phase 2: source registry
 
@@ -127,9 +127,9 @@ Roundtrips reproduce **normalized** text, not necessarily its original Unicode/n
 
 ### Structured soil encoding
 
-[StructuredSoilTokenizer](tokenizer/structured.py) is a new, separate implementation; the original [SoilTokenizer](soil_tokenizer.py) and its behavior remain unchanged. It learns feature-specific nearest-rank quantile bins and category vocabularies from rows explicitly marked `train`. Each record yields **41 ordered IDs**: numeric/unit/uncertainty-presence tokens for 12 fields, plus crop, region, source, source-version, and exact depth-range categories. The text and structured ID spaces are separate; Phase 5 must use separate embedding tables or an explicit offset scheme, not interchange their IDs.
+[StructuredSoilTokenizer](tokenizer/structured.py) is a new, separate implementation; the original [SoilTokenizer](soil_tokenizer.py) and its behavior remain unchanged. It learns feature-specific nearest-rank quantile bins and category vocabularies from rows explicitly marked `train`. Each record yields **41 ordered IDs**: numeric/unit/uncertainty-presence tokens for 12 fields, plus crop, region, source, source-version, and exact depth-range categories. The text and structured ID spaces are separate; Phase 5 uses separate embedding tables, never interchanging their IDs.
 
-Every output also retains the exact raw value, unit, missingness, uncertainty interval/method, depth, and category/source values as side channels. Bin IDs alone are lossy and cannot reconstruct measurements; a later model must consume the numeric side channels rather than claiming bins are exact continuous values. Values outside the observed training range are flagged and retained, not clipped. The numeric `calibrated` flag means training observations exist for binning, not scientific or agronomic calibration. Units must match the canonical schema; no implicit conversions occur. Unknown categories and explicitly missing categories have distinct tokens.
+Every output also retains the exact raw value, unit, missingness, uncertainty interval/method, depth, and category/source values as side channels. Bin IDs alone are lossy and cannot reconstruct measurements; Phase 5 consumes numeric side channels through feature-specific projections while retaining raw JSON text and metadata. Values outside the observed training range are flagged and retained, not clipped. The numeric `calibrated` flag means training observations exist for binning, not scientific or agronomic calibration. Units must match the canonical schema; no implicit conversions occur. Unknown categories and explicitly missing categories have distinct tokens.
 
 **All-missing phosphorus policy:** null retains its missing token. A future nonmissing value—including zero—is preserved and receives a distinct **uncalibrated** token, with no invented quantile boundaries or calibration claim. This is the selected policy; such inputs do not refit the tokenizer. The same rule applies to any all-missing feature.
 
@@ -147,13 +147,67 @@ manifest.json   # training-input hashes, settings, source, timestamp, file hashe
 
 Changing seed or vocabulary budget selects a separate release. Repeating training reuses a valid release without modifying bytes or timestamps. Corruption, missing/extra files, malformed artifacts, and provenance mismatches fail rather than being repaired. Status never trains or regenerates. Generated tokenizer files are Git-ignored; checked-in code and tests reproduce them. Byte outputs are deterministic for the same inputs/runtime; only independently created manifest timestamps differ. Unicode normalization/segmentation follows the Python runtime's Unicode database.
 
-Validation reports roundtrip failures, unknown IDs, sequence lengths, and examples exceeding the configured 256-token model context, per split. **Full QA contexts can exceed that budget. Nothing is silently truncated.** Passing these checks establishes tokenizer mechanics—not agronomic validity, model accuracy, or hallucination resistance. Context packing/chunking and numeric-side-channel consumption must be addressed before neural training.
+Validation reports roundtrip failures, unknown IDs, sequence lengths, and examples exceeding the configured model context, per split. **Nothing is silently truncated.** Passing these checks establishes tokenizer mechanics—not agronomic validity, model accuracy, or hallucination resistance.
 
-The validated seed-42 fixture release on Python 3.12 learns **760 text tokens** within the 2,048-token budget and **272 structured tokens**. All 108 QA examples roundtrip, but their fully framed sequences are 263–1,325 tokens, so **all exceed the current 256-token context budget**. Phase 5 must use the actual text vocabulary size (or mask unused output IDs), preserve the separate structured namespace, and explicitly address these overlong contexts.
+The validated seed-42 fixture release on Python 3.12 learns **760 text tokens** within the 2,048-token budget and **272 structured tokens**. All 108 QA examples roundtrip; their fully framed text sequences are 263–1,325 tokens. All exceeded the original Phase 4 context of 256. Phase 5 resolves this with the selected 1,536-position context, actual text-vocabulary output size, and separate structured embeddings; no tokenizer refit is needed.
 
 Tests cover byte BPE, deterministic merges, Unicode, special-token isolation, strict artifact loading, structured ranges/missingness/uncertainty, train-only fitting, dry runs, atomic publication, checksums, and CLI/status behavior.
 
-Next: review Phase 4, then Phase 5 (custom transformer). External ingestion approvals remain unchanged and independently blocked.
+## Phase 5: custom transformer and intact context packing
+
+Install the optional model dependency for model execution and the full test suite. Earlier workspace/tokenizer commands and read-only model validation do not import PyTorch:
+
+```powershell
+python -m pip install -e ".[model]"
+python -m agri.cli check-model --dry-run
+python -m agri.cli check-model
+python -m agri.cli validate-model
+python -m agri.cli status
+```
+
+On a fresh checkout, run setup, synthetic generation, and tokenizer training first. Review the preflight resource estimates before the configured-size check. The dry run checks all QA packing and runs a constructed 16-position, 1-layer/16-hidden forward/backward probe; it writes nothing. The normal check repeats that preflight, checks short-sequence gradients in the configured architecture, and runs one full longest **training** example through the model without gradients. There are **zero optimizer steps**, no training epochs, no generation, no downloaded weights, and no neural quality measurements. Validation/test examples are encoded only to verify that they fit, not fed through the model or used to update anything.
+
+### Architecture and mixed input stream
+
+[The custom model](models/transformer/model.py) implements learned token/position embeddings, feature-specific numeric projections, pre-normalized residual blocks, manual multi-head QKV attention with causal/key-padding masks, a two-layer GELU feed-forward network, manual population-variance layer normalization, dropout, and an untied text output projection. It uses PyTorch primitives, not `nn.Transformer`, `nn.MultiheadAttention`, pretrained components, or Hugging Face models.
+
+The default architecture has **4 layers, hidden size 256, 4 heads, feed-forward size 1,024, dropout 0.1, and context 1,536**. The fitted text vocabulary is **760** and the structured vocabulary **272**. Only the 760 real text IDs are output classes; unused IDs from the 2,048-token tokenizer budget cannot be generated. The model has **4,038,144 parameters** (**16,152,576 FP32 parameter bytes**), excluding gradients and intermediate tensors.
+
+[Context packing](models/transformer/packing.py) preserves the entire normalized question, full JSON evidence, answer, raw structured metadata, and source/evidence identifiers. The stream is:
+
+```text
+<BOS> <QUESTION> question <CONTEXT>
+    [<SOURCE> 41 structured positions <SEP>] for each soil record
+    complete JSON context <ANSWER> answer <EOS>
+```
+
+Text and structured IDs occupy separate tensors/embedding tables at matching stream positions. Structured positions have text ID zero and text positions have structured ID zero. Each soil record contributes exactly 43 additional positions including boundaries. Plant examples retain their complete metadata as text; no image encoder or disease prediction is implied. Records must stay inside the example's group/split and declared source/evidence boundaries. No live retriever exists yet.
+
+At each numeric value position, seven channels represent value, uncertainty lower/upper bounds, missingness, uncertainty missingness, uncalibrated binning, and outside-training-range status. Values and bounds use a signed `log1p` transform; no fitted scaling or clipping is applied. Depth gets its own feature projection using top/bottom bounds in the lower/upper channels. Original values, uncertainty methods, units, and depth remain in the full JSON and returned raw side channels. Tensor conversion is FP32 and is not an exact reversible representation of arbitrary numbers. Missing zero and observed zero remain distinct; observed phosphorus stays explicitly uncalibrated when no training observations exist.
+
+`pack_example` returns aligned input IDs, structured IDs, numeric features/values, attention masks, and labels, plus evidence metadata. `collate_examples` right-pads batches from one split. Import `TransformerConfig`, `AgriTransformer`, and `causal_lm_loss` from `models.transformer.model`. Pass the collated tensors except `labels` to the model; logits have shape `[batch, positions, actual_text_vocab]`. The loss shifts aligned labels internally for next-token prediction and ignores structured/padded targets (`-100`). This is a causal language-model objective, not an implemented answer-only training policy. All-padding inputs and empty supervision remain finite. Invalid tensor shapes/dtypes/ranges, conflicting namespaces, nonfinite numeric inputs, and overlong sequences are rejected.
+
+### Validation results and boundaries
+
+All **108** complete examples fit the selected 1,536-position context without truncation or chunking:
+
+| Split | Examples | Minimum positions | Maximum positions |
+|---|---:|---:|---:|
+| Train | 72 | 263 | 1,401 |
+| Validation | 18 | 266 | 1,411 |
+| Test | 18 | 266 | 1,404 |
+
+Future oversized evidence is an explicit error, never silently discarded. Smaller contexts remain configurable, but Phase 5 validation fails if the intact examples do not fit. CPU checks are bounded to at most 4 layers, hidden 256, 8 heads, FF 1,024, context 1,536, and text budget 8,192; this is not a general training resource controller.
+
+The default CPU check passed on Python 3.12/PyTorch **2.2.2+cpu**: finite short-sequence gradients and a full 1,401-position training-example forward. The reported check took **15.322 seconds wall / 13.188 seconds CPU**, using one thread for model execution. Native peak RAM was **not measured**; preflight budgets up to 2 GiB process RAM as an estimate, not an enforced limit. A single attention-score matrix at batch one/context 1,536 is 36 MiB per layer; training must account separately for gradients, additional matrices, activations, and optimizer state. No GPU was used. The local report is **2,917 bytes**; no model weights were written.
+
+The existing PyTorch installation emits a NumPy 2 ABI compatibility warning. Tensor-only checks pass and do not use NumPy conversion. The shared environment was not modified; NumPy interoperability is not validated.
+
+[The check workflow](agri/model_check.py) atomically writes a Git-ignored report under `models/transformer/reports/phase5.json`, recording configuration, code/data/tokenizer hashes, runtime, checks, and packing statistics. `validate-model` and status verify the report against current artifacts/code without initializing or fitting a model. Missing, corrupt, or stale reports fail; rerun `check-model` explicitly to replace them after changes. Checksums detect accidental changes, not authenticated attestations. The report is not a checkpoint or proof of model quality. Random initialization is seeded inside an isolated CPU RNG scope, and the caller's RNG state/thread count are restored.
+
+**155 tests pass**, including causal independence, future numeric isolation, padding, gradients, dropout, state-dict roundtrip, numeric zero/missingness, intact text/evidence preservation, overflow rejection, read-only status, provenance checks, and the prior-phase regressions. Pylance workspace diagnostics are clean. Phase 5 mechanics are GREEN; external-source approval remains YELLOW. Training, inference/UNKNOWN behavior, retrieval, and agricultural evaluation remain unimplemented.
+
+Next: review Phase 5, then Phase 6 (tiny training run). Each completed phase is committed and pushed before proceeding.
 
 ## Existing soil-health numeric tokenizer
 

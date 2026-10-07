@@ -9,6 +9,9 @@ description = "Offline-first agricultural AI proof-of-working scaffold"
 requires-python = ">=3.10"
 dependencies = ["PyYAML>=6.0.2,<7"]
 
+[project.optional-dependencies]
+model = ["torch>=2.2,<3"]
+
 [tool.setuptools]
-packages = ["agri", "tokenizer"]
+packages = ["agri", "tokenizer", "models", "models.transformer"]
 py-modules = ["soil_tokenizer"]

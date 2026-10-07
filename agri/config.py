@@ -19,7 +19,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "hidden_size": 256,
         "attention_heads": 4,
         "feed_forward_size": 1024,
-        "context_length": 256,
+        "context_length": 1536,
         "dropout": 0.1,
         "pretrained": False,
     },

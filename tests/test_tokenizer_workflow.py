@@ -33,6 +33,10 @@ class TokenizerWorkflowTests(unittest.TestCase):
         self.assertEqual(before, {p: p.read_bytes() for p in self.root.rglob("*") if p.is_file()})
 
     def test_persist_validate_and_report_all_splits_without_truncating(self):
+        config_path = self.root / "configs" / "agri-mini.json"
+        config = json.loads(config_path.read_text(encoding="utf-8"))
+        config["model"]["context_length"] = 256
+        config_path.write_text(json.dumps(config), encoding="utf-8")
         report = train_tokenizer(self.root)
         self.assertEqual(report["status"], "GREEN")
         self.assertEqual(report["phase"], 4)

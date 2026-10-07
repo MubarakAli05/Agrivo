@@ -28,5 +28,6 @@ dist/
 /tokenizer/merges.txt
 /tokenizer/config.json
 /tokenizer/releases/
+/models/transformer/reports/
 *.pt
 *.pth
