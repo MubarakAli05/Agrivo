@@ -1,6 +1,6 @@
 # AgriMini v0
 
-An agricultural AI **proof-of-working**, implemented in independently verified phases. **Phases 1–6, 8 and 10–13 are published:** repository/configuration, source/license registry, synthetic fixtures, custom tokenizers, a manually implemented transformer, and provenance-aware local retrieval. Remaining phases are being implemented in parallel and published separately after validation. Official source pages were inspected on 2026-10-07; no external datasets were ingested. Local retrieval is not neural answering or proof of agricultural accuracy.
+An agricultural AI **proof-of-working**, implemented in independently verified phases. **Phases 1–8 and 10–13 are published:** repository/configuration, source/license registry, synthetic fixtures, custom tokenizers, a manually implemented transformer, and provenance-aware local retrieval. Remaining phases are being implemented in parallel and published separately after validation. Official source pages were inspected on 2026-10-07; no external datasets were ingested. Local retrieval is not neural answering or proof of agricultural accuracy.
 
 The existing soil tokenizer remains unchanged and usable independently (see below).
 
@@ -224,6 +224,12 @@ python -m agri.cli validate-training
 **YELLOW / default training deferred by request:** the actual preflight passed (one constructed 16-position step; loss **6.017468 → 5.998347**, no persistent weights). Tiny temporary-workspace training/inference tests pass, but the configured 4,038,144-parameter model has **not** been trained. Its 20-step, batch-two plan estimates **3.14 GiB process RAM**, two checkpoints / about 31.3 MiB, CPU one thread, GPU zero, and minutes of hardware-dependent execution. Only **0.33 GiB RAM** was available at the check, so the user selected deferral rather than reducing the chosen 1,536-token context or risking the shared machine. Peak RAM was not measured. No agricultural accuracy, main-run loss or perplexity is claimed.
 
 Next: free sufficient memory, rerun the plan/preflight and explicitly run bounded training. Source approvals remain separate.
+
+## Phase 7: bounded checkpoint-backed inference
+
+After the deferred training run, use `python -m agri.cli generate --prompt "What is soil pH?" --max-new-tokens 8`. [Inference](models/transformer/inference.py) validates checkpoint provenance, uses deterministic bounded greedy decoding, and preserves valid UTF-8 text while replacing malformed byte sequences. Structured conditioning retains numeric channels and strips only the terminal EOS from an empty-answer pack; true QA answers are never fed into generation.
+
+**YELLOW in the current workspace:** implementation tests pass using tiny temporary checkpoints, but no main transformer checkpoint exists. Direct generation therefore fails explicitly; it does not invent weights or claim model knowledge. Raw generated text is untrusted, not a factual answer. No production accuracy or calibrated confidence is claimed. CPU/peak RAM for main inference are unmeasured; GPU is unused. Next: complete the deferred bounded training run.
 
 ## Phase 8: local evidence retrieval
 
