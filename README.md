@@ -1,6 +1,6 @@
 # AgriMini v0
 
-An agricultural AI **proof-of-working**, implemented in independently verified phases. **Phases 1–5, 8 and 10–13 are published:** repository/configuration, source/license registry, synthetic fixtures, custom tokenizers, a manually implemented transformer, and provenance-aware local retrieval. Remaining phases are being implemented in parallel and published separately after validation. Official source pages were inspected on 2026-10-07; no external datasets were ingested. Local retrieval is not neural answering or proof of agricultural accuracy.
+An agricultural AI **proof-of-working**, implemented in independently verified phases. **Phases 1–6, 8 and 10–13 are published:** repository/configuration, source/license registry, synthetic fixtures, custom tokenizers, a manually implemented transformer, and provenance-aware local retrieval. Remaining phases are being implemented in parallel and published separately after validation. Official source pages were inspected on 2026-10-07; no external datasets were ingested. Local retrieval is not neural answering or proof of agricultural accuracy.
 
 The existing soil tokenizer remains unchanged and usable independently (see below).
 
@@ -23,7 +23,7 @@ The directory scaffold includes application/API/dashboard, raw/processed/indexed
 
 ### Configuration and resource policy
 
-[Configuration validation](agri/config.py) rejects unknown or missing keys, malformed types, incompatible attention dimensions, and pretrained-model settings. Defaults are offline, CPU, seed 42, and a randomly initialized 4-layer/256-hidden/4-head transformer. The tokenizer vocabulary budget is 2,048; the model uses the actual fitted vocabulary. Phase 5 raises the context from 256 to **1,536**, as explicitly selected, to preserve each current QA example plus structured evidence intact. Training defaults specify a 20-step, one-epoch, batch-size-two dry run with checkpoints every ten steps. These are **future trainer settings**, not measured results or an implemented training/resource guard.
+[Configuration validation](agri/config.py) rejects unknown or missing keys, malformed types, incompatible attention dimensions, and pretrained-model settings. Defaults are offline, CPU, seed 42, and a randomly initialized 4-layer/256-hidden/4-head transformer. The tokenizer vocabulary budget is 2,048; the model uses the actual fitted vocabulary. Phase 5 raises the context from 256 to **1,536**, as explicitly selected, to preserve each current QA example plus structured evidence intact. Training defaults specify a 20-step, one-epoch, batch-size-two dry run with checkpoints every ten steps. The trainer enforces these small-run bounds and reports resource estimates before allocation. `train-model --dry-run` runs only a constructed-ID smoke step; explicit `train-model` requests dataset training. Estimates are not hard process-RAM limits.
 
 Setup never accesses the network, installs PyTorch, creates credentials, downloads datasets/checkpoints, or starts training. Later training phases must first report dataset size, storage, GPU memory, expected duration, checkpoint frequency, epochs, and data sufficiency, then pass a tiny dry run before any approved larger run. Source ingestion must wait for source inspection and license approval. Keep credentials out of configuration and version control.
 
@@ -208,6 +208,22 @@ The existing PyTorch installation emits a NumPy 2 ABI compatibility warning. Ten
 **155 tests pass**, including causal independence, future numeric isolation, padding, gradients, dropout, state-dict roundtrip, numeric zero/missingness, intact text/evidence preservation, overflow rejection, read-only status, provenance checks, and the prior-phase regressions. Pylance workspace diagnostics are clean. Phase 5 mechanics are GREEN; external-source approval remains YELLOW. These are Phase 5 results, before subsequent training or retrieval work.
 
 Independent remaining implementations run in parallel. Each verified phase is committed and pushed separately; publication order need not match phase numbering when dependencies are independent.
+
+## Phase 6: bounded transformer training
+
+```powershell
+python -m agri.cli training-plan
+python -m agri.cli train-model --dry-run
+# Run only after sufficient RAM is available:
+python -m agri.cli train-model
+python -m agri.cli validate-training
+```
+
+[The trainer](training/trainer.py) uses train-only optimization, separate validation loss/perplexity, intact context, seeded CPU execution, atomic checkpoint manifests and code/data/tokenizer provenance checks. It never evaluates the test split during fitting. Resume is deliberately unsupported; partial runs cannot silently restart. Validation imports no Torch and does not write or initialize a model.
+
+**YELLOW / default training deferred by request:** the actual preflight passed (one constructed 16-position step; loss **6.017468 → 5.998347**, no persistent weights). Tiny temporary-workspace training/inference tests pass, but the configured 4,038,144-parameter model has **not** been trained. Its 20-step, batch-two plan estimates **3.14 GiB process RAM**, two checkpoints / about 31.3 MiB, CPU one thread, GPU zero, and minutes of hardware-dependent execution. Only **0.33 GiB RAM** was available at the check, so the user selected deferral rather than reducing the chosen 1,536-token context or risking the shared machine. Peak RAM was not measured. No agricultural accuracy, main-run loss or perplexity is claimed.
+
+Next: free sufficient memory, rerun the plan/preflight and explicitly run bounded training. Source approvals remain separate.
 
 ## Phase 8: local evidence retrieval
 

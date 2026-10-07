@@ -26,6 +26,21 @@ class PhaseCommandTests(unittest.TestCase):
         importer.assert_called_once_with("retrieval.index")
         self.assertEqual(json.loads(output.getvalue())["phase"], 8)
 
+    def test_training_dry_run_is_forwarded(self):
+        with patch("agri.phase_commands.import_module") as importer:
+            importer.return_value.train_model.return_value = {"phase": 6, "status": "GREEN"}
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(main(["train-model", "--root", "workspace", "--dry-run"]), 0)
+            importer.return_value.train_model.assert_called_once_with(Path("workspace"), dry_run=True)
+
+    def test_adapter_errors_report_the_source_phase(self):
+        for source, phase in (("plantdoc", 10), ("soilgrids", 11), ("data_gov", 12), ("ssurgo", 13)):
+            with self.subTest(source=source), patch("agri.phase_commands.import_module", side_effect=ValueError("blocked")):
+                output = io.StringIO()
+                with redirect_stdout(output):
+                    self.assertEqual(main(["inspect-adapter", "--source", source]), 1)
+                self.assertEqual(json.loads(output.getvalue())["phase"], phase)
+
     def test_unavailable_optional_backend_is_a_phase_specific_json_error(self):
         with patch("agri.phase_commands.import_module", side_effect=ImportError("Optional dependency unavailable")):
             output = io.StringIO()

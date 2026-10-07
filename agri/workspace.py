@@ -134,6 +134,16 @@ def status(root: Path) -> dict[str, Any]:
         })
         report["resource_usage"]["cpu"] = "Read-only artifact/provenance validation; model not initialized"
         report["resource_usage"]["storage"] += f"; model check report: {model['storage_bytes']} bytes"
+    if config is not None and tokenizer_path(root).exists():
+        from training.trainer import training_report_path, validate_training
+        if training_report_path(root).exists():
+            training = validate_training(root)
+            report.update({"phase": 6, "phase6_status": training["status"],
+                           "training_report": training, "training": training["training"],
+                           "model": training["model"], "metrics": training["metrics"]})
+        else:
+            report["phase6_status"] = "YELLOW"
+            report["training"] = "Not started; no trained transformer checkpoint"
     index_path = root / "data" / "indexed" / "synthetic-v1.json"
     if config is not None and index_path.exists():
         from retrieval.index import validate_index

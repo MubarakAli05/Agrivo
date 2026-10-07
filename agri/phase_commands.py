@@ -7,6 +7,9 @@ from typing import Any
 
 
 COMMANDS: dict[str, tuple[int, str, tuple[str, ...]]] = {
+    "training-plan": (6, "training.trainer.training_plan", ()),
+    "train-model": (6, "training.trainer.train_model", ("dry_run",)),
+    "validate-training": (6, "training.trainer.validate_training", ()),
     "build-index": (8, "retrieval.index.build_index", ()),
     "validate-index": (8, "retrieval.index.validate_index", ()),
     "search": (8, "retrieval.index.search", ("question", "limit", "split")),
