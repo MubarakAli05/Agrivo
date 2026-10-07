@@ -1,6 +1,6 @@
 # AgriMini v0
 
-An agricultural AI **proof-of-working**, implemented in independently verified phases. **Phases 1–15 are published:** repository/configuration, source/license registry, synthetic fixtures, custom tokenizers, a manually implemented transformer, and provenance-aware local retrieval. Remaining phases are being implemented in parallel and published separately after validation. Official source pages were inspected on 2026-10-07; no external datasets were ingested. Local retrieval is not neural answering or proof of agricultural accuracy.
+An agricultural AI **proof-of-working**, implemented in independently verified phases. **Phase 1–16 implementations are published separately:** configuration, source/license gates, synthetic fixtures, custom tokenizers and transformer, bounded training/inference, evidence retrieval/QA, source adapters, synthetic vision, local dashboard, and persistent integration checks. **Overall status remains YELLOW:** default transformer training is explicitly deferred until sufficient RAM is available, checkpoint-backed integration is blocked, and external data/real-image quality is unverified. Official source pages were inspected on 2026-10-07; no external datasets were ingested. Published code and safe UNKNOWN behavior are not proof of agricultural accuracy.
 
 The existing soil tokenizer remains unchanged and usable independently (see below).
 
@@ -17,7 +17,7 @@ python -m agri.cli inspect-sources --source soilgrids
 python -m unittest discover -v
 ```
 
-Commands print JSON. RED (invalid/missing configuration or registry) returns exit code 1; GREEN and YELLOW return 0. YELLOW means metadata inspection succeeded but usage approval remains blocked, not that ingestion is permitted. Setup creates missing directories, [configuration](configs/agri-mini.json), and the source/license registry pair; it preserves existing files and rejects invalid content rather than replacing it. Status and inspection are read-only. For a separate data workspace, add `--root C:\path\to\workspace` to any command. The default root is the source checkout containing the `agri` package; these commands are intended to run from a source checkout.
+Commands print JSON. RED (invalid/missing configuration or registry) returns exit code 1; GREEN and YELLOW return 0. YELLOW indicates blocked or unverified prerequisites, not permission to ingest data or proof of model quality. Setup creates missing directories, [configuration](configs/agri-mini.json), and the source/license registry pair; it preserves existing files and rejects invalid content rather than replacing it. Status and inspection are read-only. For a separate data workspace, add `--root C:\path\to\workspace` to any command. The default root is the source checkout containing the `agri` package; these commands are intended to run from a source checkout.
 
 The directory scaffold includes application/API/dashboard, raw/processed/indexed/cached/versioned/quarantined data, source adapters, tokenizer, transformer/soil/vision models, retrieval, QA, training, evaluation, checkpoints, licenses, tests, and documentation. Empty directories have `.gitkeep` markers; they do **not** represent implemented components. Generated datasets and checkpoints are excluded by [.gitignore](.gitignore).
 
@@ -308,6 +308,24 @@ python -m agri.cli serve --port 8765
 Open `http://127.0.0.1:8765`. [The local server](app/api/server.py) exposes GET `/api/status` and POST `/api/answer` with a JSON `question`. [The dashboard](app/dashboard/index.html) uses packaged local assets, safe text rendering, source attribution, explicit UNKNOWN, and an UNTRAINED indicator when the transformer checkpoint is absent. It never starts training or ingestion. Stop with Ctrl+C.
 
 The service binds loopback, validates Host/Origin, caps requests at 8 KiB and questions at 512 characters, and allows one query at a time with up to 32 generated tokens. All API errors preserve answer/data/source/model/confidence fields. Seventeen HTTP tests pass. Browser/HTTP checks verify loading, status, and safe abstention; session counters are not quality metrics. Main model execution remains **YELLOW / blocked pending deferred training**. No real-image diagnosis or external-data quality is claimed. CPU only; peak RAM unmeasured; UI requests require no optimizer steps.
+
+## Phase 16: persistent integration and explicit deferred prerequisites
+
+```powershell
+python -m agri.cli run-integration
+python -m agri.cli validate-integration
+python -m agri.cli status
+```
+
+[The integration runner](evaluation/integration.py) validates persisted transformer mechanics, retrieval, synthetic vision, and source gates; then exercises [all 20 original demonstration questions](evaluation/demo.py) plus one exact synthetic-evidence probe. Every response must contain answer/data/source/model/confidence/UNKNOWN fields. Confidence remains null. No optimizer steps or external requests occur.
+
+Without the deferred transformer checkpoint, the expected result is **YELLOW / integration PARTIAL / model execution BLOCKED**: all 21 response contracts must pass using safe UNKNOWN, including the probe with retrievable evidence. Existing corrupt or incomplete training artifacts fail rather than being mistaken for deferral. Once bounded training can run, repeat integration: the positive probe must execute the actual checkpoint, label its deterministic evidence renderer, and withhold the unverified neural draft. Even then, agricultural accuracy remains unmeasured and real-image integration blocked.
+
+The actual deferred-training run passed **21/21 response contracts**, with **21 UNKNOWN responses and zero model-executed responses**, in 5.40 s wall / 5.16 s CPU. The persisted report is 62,536 bytes. These are abstention/contract results, not model-answer accuracy.
+
+Final regression: **306 tests passed in 337.17 s** on Python 3.12.10. Pylance reported no errors or warnings (only unused-symbol hints). Browser HTTP/status/UNKNOWN checks and wheel/dashboard asset inclusion passed. The installed Torch 2.2.2 + NumPy 2.2.6 combination emits an ABI warning; tested tensor-only paths passed without NumPy conversion. No dependencies were silently changed, and these tests did not run the deferred default-model dataset training.
+
+The atomic, checksummed local report at `evaluation/reports/phase16.json` contains cases, contract counts, source status, measured CPU/wall time, and fingerprints of code/configuration/data/checkpoints. It is ignored by Git; regenerate it after any dependency changes. Validation is read-only and rejects stale fingerprints, inconsistent metrics, missing cases, or unsupported success claims. Status includes a compact summary without initializing Torch. Peak RAM is unmeasured and GPU unused. Source approvals, real-image evaluation, and field-quality metrics remain separate prerequisites; there are no silently substituted pretrained models or reduced-context default runs.
 
 ## Existing soil-health numeric tokenizer
 

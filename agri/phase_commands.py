@@ -22,6 +22,8 @@ COMMANDS: dict[str, tuple[int, str, tuple[str, ...]]] = {
     "check-vision": (14, "models.vision_baseline.workflow.check_vision", ("dry_run",)),
     "validate-vision": (14, "models.vision_baseline.workflow.validate_vision", ()),
     "serve": (15, "app.api.server.serve", ("port",)),
+    "run-integration": (16, "evaluation.integration.run_integration", ()),
+    "validate-integration": (16, "evaluation.integration.validate_integration", ()),
 }
 
 ADAPTER_PHASES = {"plantvillage": 10, "plantdoc": 10, "soilgrids": 11, "isric": 11,

@@ -29,5 +29,6 @@ dist/
 /tokenizer/config.json
 /tokenizer/releases/
 /models/transformer/reports/
+/evaluation/reports/
 *.pt
 *.pth

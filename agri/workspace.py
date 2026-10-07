@@ -173,4 +173,15 @@ def status(root: Path) -> dict[str, Any]:
             prior = report.get(key, "GREEN")
             states = (prior, adapter["status"])
             report[key] = "RED" if "RED" in states else "YELLOW" if "YELLOW" in states else "GREEN"
+    from evaluation.integration import integration_report_path, validate_integration
+    if integration_report_path(root).exists():
+        integration = validate_integration(root)
+        report.update({"phase": 16, "phase16_status": integration["status"],
+                       "integration": {key: integration[key] for key in (
+                           "status", "integration_mechanics", "model_execution", "metrics",
+                           "blockers", "resource_usage")},
+                       "next_required_step": integration["next_required_step"]})
+        if report["status"] != "RED":
+            report["status"] = integration["status"]
+        report["blockers"].extend(integration["blockers"])
     return report
