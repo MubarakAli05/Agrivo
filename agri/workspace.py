@@ -150,6 +150,17 @@ def status(root: Path) -> dict[str, Any]:
         index = validate_index(root)
         report.update({"phase": 8, "phase8_status": index["status"], "retrieval": index})
         report["resource_usage"]["storage"] += f"; retrieval index: {index_path.stat().st_size} bytes"
+    if config is not None:
+        from models.vision_baseline.workflow import vision_report_path, validate_vision
+        if vision_report_path(root).exists():
+            vision = validate_vision(root)
+            report.update({"phase": 14, "phase14_status": vision["status"],
+                           "vision": {key: vision[key] for key in (
+                               "status", "synthetic_model_mechanics", "real_image_integration",
+                               "checks", "quality", "checkpoint", "blockers")}})
+            if report["status"] != "RED":
+                report["status"] = vision["status"]
+            report["blockers"].extend(vision["blockers"])
     if registry is not None:
         from agri.phase_commands import ADAPTER_PHASES
         from sources.ingestion import inspect_adapter

@@ -18,6 +18,9 @@ COMMANDS: dict[str, tuple[int, str, tuple[str, ...]]] = {
     "inspect-adapter": (10, "sources.ingestion.inspect_adapter", ("source_id",)),
     "adapter-schema": (10, "agri.phase_commands.show_adapter_schema", ("source_id",)),
     "ingest-snapshot": (10, "sources.ingestion.ingest_snapshot", ("source_id", "snapshot", "purpose")),
+    "vision-plan": (14, "models.vision_baseline.workflow.vision_plan", ()),
+    "check-vision": (14, "models.vision_baseline.workflow.check_vision", ("dry_run",)),
+    "validate-vision": (14, "models.vision_baseline.workflow.validate_vision", ()),
 }
 
 ADAPTER_PHASES = {"plantvillage": 10, "plantdoc": 10, "soilgrids": 11, "isric": 11,

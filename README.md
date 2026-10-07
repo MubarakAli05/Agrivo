@@ -1,6 +1,6 @@
 # AgriMini v0
 
-An agricultural AI **proof-of-working**, implemented in independently verified phases. **Phases 1–13 are published:** repository/configuration, source/license registry, synthetic fixtures, custom tokenizers, a manually implemented transformer, and provenance-aware local retrieval. Remaining phases are being implemented in parallel and published separately after validation. Official source pages were inspected on 2026-10-07; no external datasets were ingested. Local retrieval is not neural answering or proof of agricultural accuracy.
+An agricultural AI **proof-of-working**, implemented in independently verified phases. **Phases 1–14 are published:** repository/configuration, source/license registry, synthetic fixtures, custom tokenizers, a manually implemented transformer, and provenance-aware local retrieval. Remaining phases are being implemented in parallel and published separately after validation. Official source pages were inspected on 2026-10-07; no external datasets were ingested. Local retrieval is not neural answering or proof of agricultural accuracy.
 
 The existing soil tokenizer remains unchanged and usable independently (see below).
 
@@ -285,6 +285,19 @@ Use the adapter commands with `--source data_gov`. [The adapter](sources/data_go
 Use the adapter commands with `--source ssurgo`. [The adapter](sources/ssurgo/__init__.py) validates explicit `mapunit` → `component` → `chorizon` joins, preserving component/horizon identities, units, depth, missingness and provenance. It does not average components or infer organic carbon from organic matter. Native archives/spatial queries are not supported.
 
 **YELLOW:** invented-fixture join/normalization tests pass; a reviewed pinned dataset and usage approval are still required. Real data quality is UNVERIFIED. No external data, model fitting or GPU use; CPU/peak RAM were not measured. Next: obtain source-specific approval before importing a prepared snapshot.
+
+## Phase 14: synthetic vision mechanics, not disease diagnosis
+
+```powershell
+python -m agri.cli vision-plan
+python -m agri.cli check-vision --dry-run
+python -m agri.cli check-vision
+python -m agri.cli validate-vision
+```
+
+[The vision baseline](models/vision_baseline/workflow.py) uses a scratch 507-parameter model on six generated RGB 16×16 geometric patterns, never plant images. The persisted CPU check ran two SGD steps with batch 6, one thread, and learning rate 0.05. Training-batch loss moved **1.102448 → 1.101983 → 1.101524**, with finite gradients and changed weights. Checkpoint: **8,008 bytes**; report: **6,154 bytes**. Nineteen focused tests passed.
+
+**Synthetic mechanics GREEN; overall YELLOW; real-image integration BLOCKED.** No disease accuracy, validation/test performance, calibrated confidence, or agronomic generalization is available. Image diagnosis always returns UNKNOWN. Approvals remain pending and metadata fixtures contain no images. GPU unused; wall time and peak RAM unmeasured (planning estimate up to 1 GiB, not an enforced limit). Next: approved real-image datasets and separately evaluated disease training, not reuse of these pattern labels.
 
 ## Existing soil-health numeric tokenizer
 
