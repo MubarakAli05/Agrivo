@@ -134,4 +134,10 @@ def status(root: Path) -> dict[str, Any]:
         })
         report["resource_usage"]["cpu"] = "Read-only artifact/provenance validation; model not initialized"
         report["resource_usage"]["storage"] += f"; model check report: {model['storage_bytes']} bytes"
+    index_path = root / "data" / "indexed" / "synthetic-v1.json"
+    if config is not None and index_path.exists():
+        from retrieval.index import validate_index
+        index = validate_index(root)
+        report.update({"phase": 8, "phase8_status": index["status"], "retrieval": index})
+        report["resource_usage"]["storage"] += f"; retrieval index: {index_path.stat().st_size} bytes"
     return report

@@ -1,6 +1,6 @@
 # AgriMini v0
 
-An agricultural AI **proof-of-working**, implemented in reviewed phases. **Phases 1–5 are implemented:** repository/configuration, non-destructive setup/status, a validated source/license registry, tiny synthetic soil/plant-metadata/QA fixtures, custom text/structured tokenizers, and a manually implemented PyTorch transformer with intact context packing and CPU mechanics checks. Official source pages were inspected on 2026-10-07; no external datasets were ingested. Retrieval adapters, transformer training, image analysis, live question answering, and the dashboard are not implemented yet. There are no trained neural weights or model evaluation metrics.
+An agricultural AI **proof-of-working**, implemented in independently verified phases. **Phases 1–5 and 8 are published:** repository/configuration, source/license registry, synthetic fixtures, custom tokenizers, a manually implemented transformer, and provenance-aware local retrieval. Remaining phases are being implemented in parallel and published separately after validation. Official source pages were inspected on 2026-10-07; no external datasets were ingested. Local retrieval is not neural answering or proof of agricultural accuracy.
 
 The existing soil tokenizer remains unchanged and usable independently (see below).
 
@@ -27,7 +27,7 @@ The directory scaffold includes application/API/dashboard, raw/processed/indexed
 
 Setup never accesses the network, installs PyTorch, creates credentials, downloads datasets/checkpoints, or starts training. Later training phases must first report dataset size, storage, GPU memory, expected duration, checkpoint frequency, epochs, and data sufficiency, then pass a tiny dry run before any approved larger run. Source ingestion must wait for source inspection and license approval. Keep credentials out of configuration and version control.
 
-Available commands are `setup`, `status`, `inspect-sources`, `generate-synthetic`, `validate-data`, `train-tokenizer`, `validate-tokenizer`, `check-model`, and `validate-model`. Later commands are deliberately unavailable rather than returning simulated results. Status reports layout, external-source review, fixture validation, tokenizer validation, and recorded model checks separately when their artifacts exist. Overall status remains YELLOW while external approvals are pending, even when Phases 3–5 are GREEN; none proves end-to-end model success.
+Available commands are `setup`, `status`, `inspect-sources`, `generate-synthetic`, `validate-data`, `train-tokenizer`, `validate-tokenizer`, `check-model`, `validate-model`, `build-index`, `validate-index`, and `search`. Additional commands are registered only when their implementations are integrated. Status reports layout, external-source review, fixture validation, tokenizer validation, and recorded model checks separately when their artifacts exist. Overall status remains YELLOW while external approvals are pending, even when Phases 3–5 are GREEN; none proves end-to-end model success.
 
 ## Phase 2: source registry
 
@@ -205,9 +205,21 @@ The existing PyTorch installation emits a NumPy 2 ABI compatibility warning. Ten
 
 [The check workflow](agri/model_check.py) atomically writes a Git-ignored report under `models/transformer/reports/phase5.json`, recording configuration, code/data/tokenizer hashes, runtime, checks, and packing statistics. `validate-model` and status verify the report against current artifacts/code without initializing or fitting a model. Missing, corrupt, or stale reports fail; rerun `check-model` explicitly to replace them after changes. Checksums detect accidental changes, not authenticated attestations. The report is not a checkpoint or proof of model quality. Random initialization is seeded inside an isolated CPU RNG scope, and the caller's RNG state/thread count are restored.
 
-**155 tests pass**, including causal independence, future numeric isolation, padding, gradients, dropout, state-dict roundtrip, numeric zero/missingness, intact text/evidence preservation, overflow rejection, read-only status, provenance checks, and the prior-phase regressions. Pylance workspace diagnostics are clean. Phase 5 mechanics are GREEN; external-source approval remains YELLOW. Training, inference/UNKNOWN behavior, retrieval, and agricultural evaluation remain unimplemented.
+**155 tests pass**, including causal independence, future numeric isolation, padding, gradients, dropout, state-dict roundtrip, numeric zero/missingness, intact text/evidence preservation, overflow rejection, read-only status, provenance checks, and the prior-phase regressions. Pylance workspace diagnostics are clean. Phase 5 mechanics are GREEN; external-source approval remains YELLOW. These are Phase 5 results, before subsequent training or retrieval work.
 
-Next: review Phase 5, then Phase 6 (tiny training run). Each completed phase is committed and pushed before proceeding.
+Independent remaining implementations run in parallel. Each verified phase is committed and pushed separately; publication order need not match phase numbering when dependencies are independent.
+
+## Phase 8: local evidence retrieval
+
+```powershell
+python -m agri.cli build-index
+python -m agri.cli validate-index
+python -m agri.cli search --question "What is pH at 0-5 cm for synthetic-site-02?"
+```
+
+[The local index](retrieval/index.py) contains **30 synthetic evidence records** (24 soil, six plant metadata), partitioned into 20 train / five validation / five test. **Zero QA answers** are indexed. Retrieval defaults to train and requires exact fictional entity/property/depth matching; unsupported or ambiguous questions return no evidence rather than fabricated matches. Results preserve record/source/manifest checksums, original values, units, depth, uncertainty, missingness and explicit synthetic provenance.
+
+The actual index was built and read-only validation passed. The example retrieves synthetic pH **6.98**, not a measured field value. Index mechanics are GREEN; real-data access and agricultural quality remain blocked. No model training, network or GPU is involved. CPU time/peak RAM were not measured. The ignored index is `data/indexed/synthetic-v1.json`; rerun `build-index` explicitly after valid data changes. Next: checkpoint-backed integration and separate external-source approval.
 
 ## Existing soil-health numeric tokenizer
 

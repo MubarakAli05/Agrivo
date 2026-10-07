@@ -13,5 +13,9 @@ dependencies = ["PyYAML>=6.0.2,<7"]
 model = ["torch>=2.2,<3"]
 
 [tool.setuptools]
-packages = ["agri", "tokenizer", "models", "models.transformer"]
 py-modules = ["soil_tokenizer"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["agri*", "tokenizer*", "models*", "training*", "retrieval*", "sources*", "app*", "evaluation*"]
+namespaces = false
