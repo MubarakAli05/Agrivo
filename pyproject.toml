@@ -19,3 +19,6 @@ py-modules = ["soil_tokenizer"]
 where = ["."]
 include = ["agri*", "tokenizer*", "models*", "training*", "retrieval*", "sources*", "app*", "evaluation*"]
 namespaces = false
+
+[tool.setuptools.package-data]
+"app.dashboard" = ["*.html", "*.css", "*.js"]

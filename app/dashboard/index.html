@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>AgriMini · Local evidence dashboard</title>
+  <link rel="stylesheet" href="/dashboard.css">
+  <script src="/dashboard.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to dashboard</a>
+<header class="masthead">
+  <div><p class="eyebrow">AGRIMINI / PROOF OF WORKING</p><h1>Local evidence, honest answers.</h1>
+    <p>A small agricultural research system. Not a production advisor.</p></div>
+  <span class="badge">LOCAL ONLY · READ ONLY</span>
+</header>
+<main id="main">
+  <section class="notice" aria-label="Research limitations">
+    <strong>SYNTHETIC FIXTURES ≠ FIELD EVIDENCE</strong>
+    <span id="model-badge" class="badge">MODEL STATUS UNKNOWN</span>
+    <p>Fixture values and test results do not establish real-world accuracy. Untrained or unavailable models cannot provide verified model knowledge. External data requires source-specific approval.</p>
+    <p>No downloads, ingestion, training, external requests or credentials are initiated by this page.</p>
+  </section>
+  <section aria-labelledby="status-heading">
+    <div class="section-heading"><h2 id="status-heading">Workspace status</h2><button id="refresh" type="button">Refresh status</button></div>
+    <p id="status-message" role="status" aria-live="polite">Reading local workspace…</p>
+    <div class="cards" id="status-cards"></div>
+    <div class="panel"><h3>Gates & next steps</h3><p id="next-step">UNKNOWN</p><ul id="blockers"></ul></div>
+  </section>
+  <section class="query panel" aria-labelledby="query-heading">
+    <div><p class="eyebrow">QUESTION → LOCAL EVIDENCE → ANSWER</p><h2 id="query-heading">Ask the workspace</h2>
+      <p>Use a synthetic record identifier when available. Missing evidence should return <strong>UNKNOWN</strong>, not a guessed answer.</p></div>
+    <form id="question-form">
+      <label for="question">Agricultural question</label>
+      <textarea id="question" name="question" rows="3" maxlength="512" required aria-describedby="question-help" placeholder="What is soil pH?"></textarea>
+      <div class="form-footer"><small id="question-help">Up to 512 characters · at most 32 generated tokens · one query at a time</small><button id="ask" type="submit">Ask locally</button></div>
+    </form>
+    <p id="query-state" role="status" aria-live="polite">No question submitted.</p>
+    <div id="answer-panel" hidden>
+      <span id="answer-badge" class="badge">UNKNOWN</span>
+      <h3>Answer</h3><p id="answer-text" class="preserve"></p>
+      <h3>Evidence & provenance</h3><p>Source URLs below are provenance text, not fetched resources. Model output is not itself source evidence.</p><pre id="evidence"></pre>
+      <details><summary>Full local response (origins, confidence and limitations)</summary><pre id="answer-details"></pre></details>
+    </div>
+  </section>
+  <section aria-labelledby="metrics-heading"><h2 id="metrics-heading">Measured progress</h2><p>Not reported means not measured. Session counters reset when the server restarts; they are not evaluation results.</p><div id="metrics" class="metric-grid"></div></section>
+  <section aria-labelledby="sources-heading"><h2 id="sources-heading">Data & source provenance</h2><p>Registry entries describe discovered sources, not downloaded or approved datasets. Fixture counts are not retrieval-index counts.</p><div id="sources" class="cards"></div></section>
+  <details class="panel"><summary>Raw workspace status</summary><pre id="raw-status">Not loaded</pre></details>
+</main>
+<footer>AgriMini v0 · Loopback workspace · No pretrained models claimed · No cloud connection</footer>
+</body>
+</html>

@@ -1,6 +1,6 @@
 # AgriMini v0
 
-An agricultural AI **proof-of-working**, implemented in independently verified phases. **Phases 1–14 are published:** repository/configuration, source/license registry, synthetic fixtures, custom tokenizers, a manually implemented transformer, and provenance-aware local retrieval. Remaining phases are being implemented in parallel and published separately after validation. Official source pages were inspected on 2026-10-07; no external datasets were ingested. Local retrieval is not neural answering or proof of agricultural accuracy.
+An agricultural AI **proof-of-working**, implemented in independently verified phases. **Phases 1–15 are published:** repository/configuration, source/license registry, synthetic fixtures, custom tokenizers, a manually implemented transformer, and provenance-aware local retrieval. Remaining phases are being implemented in parallel and published separately after validation. Official source pages were inspected on 2026-10-07; no external datasets were ingested. Local retrieval is not neural answering or proof of agricultural accuracy.
 
 The existing soil tokenizer remains unchanged and usable independently (see below).
 
@@ -298,6 +298,16 @@ python -m agri.cli validate-vision
 [The vision baseline](models/vision_baseline/workflow.py) uses a scratch 507-parameter model on six generated RGB 16×16 geometric patterns, never plant images. The persisted CPU check ran two SGD steps with batch 6, one thread, and learning rate 0.05. Training-batch loss moved **1.102448 → 1.101983 → 1.101524**, with finite gradients and changed weights. Checkpoint: **8,008 bytes**; report: **6,154 bytes**. Nineteen focused tests passed.
 
 **Synthetic mechanics GREEN; overall YELLOW; real-image integration BLOCKED.** No disease accuracy, validation/test performance, calibrated confidence, or agronomic generalization is available. Image diagnosis always returns UNKNOWN. Approvals remain pending and metadata fixtures contain no images. GPU unused; wall time and peak RAM unmeasured (planning estimate up to 1 GiB, not an enforced limit). Next: approved real-image datasets and separately evaluated disease training, not reuse of these pattern labels.
+
+## Phase 15: local dashboard and API
+
+```powershell
+python -m agri.cli serve --port 8765
+```
+
+Open `http://127.0.0.1:8765`. [The local server](app/api/server.py) exposes GET `/api/status` and POST `/api/answer` with a JSON `question`. [The dashboard](app/dashboard/index.html) uses packaged local assets, safe text rendering, source attribution, explicit UNKNOWN, and an UNTRAINED indicator when the transformer checkpoint is absent. It never starts training or ingestion. Stop with Ctrl+C.
+
+The service binds loopback, validates Host/Origin, caps requests at 8 KiB and questions at 512 characters, and allows one query at a time with up to 32 generated tokens. All API errors preserve answer/data/source/model/confidence fields. Seventeen HTTP tests pass. Browser/HTTP checks verify loading, status, and safe abstention; session counters are not quality metrics. Main model execution remains **YELLOW / blocked pending deferred training**. No real-image diagnosis or external-data quality is claimed. CPU only; peak RAM unmeasured; UI requests require no optimizer steps.
 
 ## Existing soil-health numeric tokenizer
 
