@@ -10,7 +10,12 @@ COMMANDS: dict[str, tuple[int, str, tuple[str, ...]]] = {
     "build-index": (8, "retrieval.index.build_index", ()),
     "validate-index": (8, "retrieval.index.validate_index", ()),
     "search": (8, "retrieval.index.search", ("question", "limit", "split")),
+    "inspect-adapter": (10, "sources.ingestion.inspect_adapter", ("source_id",)),
+    "adapter-schema": (10, "agri.phase_commands.show_adapter_schema", ("source_id",)),
+    "ingest-snapshot": (10, "sources.ingestion.ingest_snapshot", ("source_id", "snapshot", "purpose")),
 }
+
+ADAPTER_PHASES = {"plantvillage": 10, "plantdoc": 10}
 
 OPTIONS: dict[str, dict[str, Any]] = {
     "dry_run": {"action": "store_true", "help": "Run a bounded preflight without publishing artifacts"},
@@ -34,6 +39,19 @@ def register_commands(commands: Any, root: Path) -> None:
         for option in options:
             flag = "--source" if option == "source_id" else "--" + option.replace("_", "-")
             parser.add_argument(flag, dest=option, **OPTIONS[option])
+
+
+def command_phase(args: argparse.Namespace) -> int:
+    if args.command in {"inspect-adapter", "adapter-schema", "ingest-snapshot"}:
+        return ADAPTER_PHASES.get(args.source_id, 10)
+    return COMMANDS[args.command][0]
+
+
+def show_adapter_schema(root: Path, source_id: str) -> dict[str, Any]:
+    from sources.ingestion import adapter_schema
+    schema = adapter_schema(source_id)
+    return {"phase": schema["phase"], "status": "GREEN", "schema": schema,
+            "scope": "Format documentation only; no ingestion approval granted"}
 
 
 def execute(args: argparse.Namespace) -> dict[str, Any] | None:

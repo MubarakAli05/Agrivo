@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 from agri.model_check import check_model, model_report_path, validate_model
-from agri.phase_commands import COMMANDS, execute, register_commands
+from agri.phase_commands import COMMANDS, command_phase, execute, register_commands
 from agri.source_registry import inspect_sources
 from agri.synthetic_data import generate_synthetic, validate_data
 from agri.workspace import PROJECT_ROOT, setup, status
@@ -53,7 +53,7 @@ def main(argv: list[str] | None = None) -> int:
                 args.command in ("setup", "status") and model_report_path(args.root).exists()):
             phase = 5
         if args.command in COMMANDS:
-            phase = COMMANDS[args.command][0]
+            phase = command_phase(args)
         print(json.dumps({"phase": phase, "status": "RED", "error": str(exc)}))
         return 1
     print(json.dumps(report, indent=2))

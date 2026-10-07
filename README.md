@@ -1,6 +1,6 @@
 # AgriMini v0
 
-An agricultural AI **proof-of-working**, implemented in independently verified phases. **Phases 1–5 and 8 are published:** repository/configuration, source/license registry, synthetic fixtures, custom tokenizers, a manually implemented transformer, and provenance-aware local retrieval. Remaining phases are being implemented in parallel and published separately after validation. Official source pages were inspected on 2026-10-07; no external datasets were ingested. Local retrieval is not neural answering or proof of agricultural accuracy.
+An agricultural AI **proof-of-working**, implemented in independently verified phases. **Phases 1–5, 8 and 10 are published:** repository/configuration, source/license registry, synthetic fixtures, custom tokenizers, a manually implemented transformer, and provenance-aware local retrieval. Remaining phases are being implemented in parallel and published separately after validation. Official source pages were inspected on 2026-10-07; no external datasets were ingested. Local retrieval is not neural answering or proof of agricultural accuracy.
 
 The existing soil tokenizer remains unchanged and usable independently (see below).
 
@@ -220,6 +220,21 @@ python -m agri.cli search --question "What is pH at 0-5 cm for synthetic-site-02
 [The local index](retrieval/index.py) contains **30 synthetic evidence records** (24 soil, six plant metadata), partitioned into 20 train / five validation / five test. **Zero QA answers** are indexed. Retrieval defaults to train and requires exact fictional entity/property/depth matching; unsupported or ambiguous questions return no evidence rather than fabricated matches. Results preserve record/source/manifest checksums, original values, units, depth, uncertainty, missingness and explicit synthetic provenance.
 
 The actual index was built and read-only validation passed. The example retrieves synthetic pH **6.98**, not a measured field value. Index mechanics are GREEN; real-data access and agricultural quality remain blocked. No model training, network or GPU is involved. CPU time/peak RAM were not measured. The ignored index is `data/indexed/synthetic-v1.json`; rerun `build-index` explicitly after valid data changes. Next: checkpoint-backed integration and separate external-source approval.
+
+## Phase 10: gated plant-metadata snapshot adapters
+
+```powershell
+python -m agri.cli inspect-adapter --source plantvillage
+python -m agri.cli adapter-schema --source plantdoc
+# This remains blocked until a named, dated, purpose-specific review is recorded:
+python -m agri.cli ingest-snapshot --source plantvillage --snapshot C:\reviewed\snapshot.json --purpose research_training
+```
+
+[Snapshot ingestion](sources/ingestion.py) checks approval **before reading the supplied file**. It does not download anything. PlantVillage/PlantDoc adapters preserve image metadata, rights, provenance and stable leaf/original-image groups; they detect within-snapshot group leakage. No image bytes are loaded, and cross-release split isolation still requires downstream group enforcement.
+
+`adapter-schema` exports the exact machine-readable envelope, columns, nested types, accepted units and limitations for each implemented source. Every snapshot is one UTF-8 JSON envelope containing `schema_version`, `source_id`, `dataset_id`, pinned `source_version`, reviewed `source_url`, timezone-qualified `retrieved_at`, `citations`, `license`, `data_origin`, `format`, and `records`. Unknown fields, ambiguous units and invented missing values are rejected. License metadata includes name, URL, attribution and upstream-rights notes. These declarations are not independent rights verification. Outputs retain original bytes and immutable checksummed lineage; they are not added to the synthetic training/retrieval release automatically.
+
+**YELLOW:** parser mechanics pass on invented test fixtures, but actual ingestion remains blocked (all ten sources disabled; all approvals pending). No real data, training or GPU was used. CPU/peak RAM were not measured. Next: source-specific dataset/version/rights review; never approve a catalog as a blanket dataset.
 
 ## Existing soil-health numeric tokenizer
 

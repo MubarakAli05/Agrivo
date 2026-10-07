@@ -140,4 +140,16 @@ def status(root: Path) -> dict[str, Any]:
         index = validate_index(root)
         report.update({"phase": 8, "phase8_status": index["status"], "retrieval": index})
         report["resource_usage"]["storage"] += f"; retrieval index: {index_path.stat().st_size} bytes"
+    if registry is not None:
+        from agri.phase_commands import ADAPTER_PHASES
+        from sources.ingestion import inspect_adapter
+        report["adapters"] = {}
+        for source_id, phase in ADAPTER_PHASES.items():
+            adapter = inspect_adapter(root, source_id)
+            report["adapters"][source_id] = {key: adapter[key] for key in
+                ("phase", "status", "adapter_status", "real_data_quality", "ingestion")}
+            key = f"phase{phase}_status"
+            prior = report.get(key, "GREEN")
+            states = (prior, adapter["status"])
+            report[key] = "RED" if "RED" in states else "YELLOW" if "YELLOW" in states else "GREEN"
     return report
