@@ -1,6 +1,6 @@
 # AgriMini v0
 
-An agricultural AI **proof-of-working**, implemented in independently verified phases. **Phases 1–5, 8 and 10–11 are published:** repository/configuration, source/license registry, synthetic fixtures, custom tokenizers, a manually implemented transformer, and provenance-aware local retrieval. Remaining phases are being implemented in parallel and published separately after validation. Official source pages were inspected on 2026-10-07; no external datasets were ingested. Local retrieval is not neural answering or proof of agricultural accuracy.
+An agricultural AI **proof-of-working**, implemented in independently verified phases. **Phases 1–5, 8 and 10–12 are published:** repository/configuration, source/license registry, synthetic fixtures, custom tokenizers, a manually implemented transformer, and provenance-aware local retrieval. Remaining phases are being implemented in parallel and published separately after validation. Official source pages were inspected on 2026-10-07; no external datasets were ingested. Local retrieval is not neural answering or proof of agricultural accuracy.
 
 The existing soil tokenizer remains unchanged and usable independently (see below).
 
@@ -241,6 +241,12 @@ python -m agri.cli ingest-snapshot --source plantvillage --snapshot C:\reviewed\
 Use `inspect-adapter`, `adapter-schema`, and `ingest-snapshot` with `--source soilgrids` or `--source isric`. [SoilGrids](sources/soilgrids/__init__.py) and [ISRIC](sources/isric/__init__.py) normalize explicitly described point/profile layers, CRS, depth, units, uncertainty and missingness. Source-specific conversions are listed in the exported schema; unsupported units fail rather than being guessed. Native rasters, WCS downloads and live APIs are not implemented.
 
 **YELLOW:** fixture parser tests pass; actual acquisition/ingestion is blocked by dataset/version and intended-use review. Real soil quality is UNVERIFIED. No external data, model fitting or GPU use; CPU/peak RAM were not measured. Next: approve a specific pinned dataset and provide a reviewed snapshot.
+
+## Phase 12: data.gov.in resource snapshots
+
+Use the adapter commands with `--source data_gov`. [The adapter](sources/data_gov/__init__.py) accepts resource-specific area/production/yield rows as JSON records or CSV text **inside the same mandatory JSON metadata envelope**. Resource identity, district/crop/season/year, units and provenance remain explicit; the exported schema documents numeric parsing and conversions. It does not scrape the catalog or accept an unidentified CSV file as reviewed data.
+
+**YELLOW:** invented-fixture parser checks pass; real access, resource-specific terms and intended use remain blocked. No external data, fitting or GPU use; CPU/peak RAM were not measured. Next: review one specific resource and its rights/version, not the whole catalog.
 
 ## Existing soil-health numeric tokenizer
 
