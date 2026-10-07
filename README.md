@@ -1,6 +1,6 @@
 # AgriMini v0
 
-An agricultural AI **proof-of-working**, implemented in independently verified phases. **Phases 1–8 and 10–13 are published:** repository/configuration, source/license registry, synthetic fixtures, custom tokenizers, a manually implemented transformer, and provenance-aware local retrieval. Remaining phases are being implemented in parallel and published separately after validation. Official source pages were inspected on 2026-10-07; no external datasets were ingested. Local retrieval is not neural answering or proof of agricultural accuracy.
+An agricultural AI **proof-of-working**, implemented in independently verified phases. **Phases 1–13 are published:** repository/configuration, source/license registry, synthetic fixtures, custom tokenizers, a manually implemented transformer, and provenance-aware local retrieval. Remaining phases are being implemented in parallel and published separately after validation. Official source pages were inspected on 2026-10-07; no external datasets were ingested. Local retrieval is not neural answering or proof of agricultural accuracy.
 
 The existing soil tokenizer remains unchanged and usable independently (see below).
 
@@ -27,7 +27,7 @@ The directory scaffold includes application/API/dashboard, raw/processed/indexed
 
 Setup never accesses the network, installs PyTorch, creates credentials, downloads datasets/checkpoints, or starts training. Later training phases must first report dataset size, storage, GPU memory, expected duration, checkpoint frequency, epochs, and data sufficiency, then pass a tiny dry run before any approved larger run. Source ingestion must wait for source inspection and license approval. Keep credentials out of configuration and version control.
 
-Available commands are `setup`, `status`, `inspect-sources`, `generate-synthetic`, `validate-data`, `train-tokenizer`, `validate-tokenizer`, `check-model`, `validate-model`, `build-index`, `validate-index`, and `search`. Additional commands are registered only when their implementations are integrated. Status reports layout, external-source review, fixture validation, tokenizer validation, and recorded model checks separately when their artifacts exist. Overall status remains YELLOW while external approvals are pending, even when Phases 3–5 are GREEN; none proves end-to-end model success.
+Commands include `setup`, `status`, `inspect-sources`, `generate-synthetic`, `validate-data`, `train-tokenizer`, `validate-tokenizer`, `check-model`, `validate-model`, `training-plan`, `train-model`, `validate-training`, `generate`, `build-index`, `validate-index`, `search`, `answer`, `inspect-adapter`, `adapter-schema`, and `ingest-snapshot`. Run `python -m agri.cli --help` for the current complete list. Status reports layout, external-source review, fixture validation, tokenizer validation, and recorded model checks separately when their artifacts exist. Overall status remains YELLOW while external approvals are pending, even when Phases 3–5 are GREEN; none proves end-to-end model success.
 
 ## Phase 2: source registry
 
@@ -242,6 +242,16 @@ python -m agri.cli search --question "What is pH at 0-5 cm for synthetic-site-02
 [The local index](retrieval/index.py) contains **30 synthetic evidence records** (24 soil, six plant metadata), partitioned into 20 train / five validation / five test. **Zero QA answers** are indexed. Retrieval defaults to train and requires exact fictional entity/property/depth matching; unsupported or ambiguous questions return no evidence rather than fabricated matches. Results preserve record/source/manifest checksums, original values, units, depth, uncertainty, missingness and explicit synthetic provenance.
 
 The actual index was built and read-only validation passed. The example retrieves synthetic pH **6.98**, not a measured field value. Index mechanics are GREEN; real-data access and agricultural quality remain blocked. No model training, network or GPU is involved. CPU time/peak RAM were not measured. The ignored index is `data/indexed/synthetic-v1.json`; rerun `build-index` explicitly after valid data changes. Next: checkpoint-backed integration and separate external-source approval.
+
+## Phase 9: evidence-constrained answers and UNKNOWN
+
+```powershell
+python -m agri.cli answer --question "What is pH at 0-5 cm for synthetic-site-02?" --max-new-tokens 8
+```
+
+[The QA pipeline](retrieval/qa.py) returns explicit `answer`, `data_used`, `sources`, `model_version`, `confidence`, and `unknown` fields. Confidence is always null. Train-only retrieval excludes QA answers. Without a valid checkpoint, even a supported evidence query abstains with UNKNOWN; unsupported locations, imagery, and recommendations also abstain. Corruption/execution failures are RED rather than silently accepted.
+
+With a validated checkpoint, the model executes on empty-answer structured conditioning, but its unverified draft is withheld. A deterministic evidence renderer supplies the supported factual answer and is labeled explicitly; this is not a claim of learned factual accuracy. Current main-workspace execution is **YELLOW: default training deferred**. Thirty focused retrieval/QA tests passed using mocks where checkpoint execution was needed; these are not a main trained-model evaluation. No external data, calibrated accuracy, or production recommendations are claimed. Next: train when RAM permits, then validate checkpoint-backed integration.
 
 ## Phase 10: gated plant-metadata snapshot adapters
 

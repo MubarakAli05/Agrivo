@@ -14,6 +14,7 @@ COMMANDS: dict[str, tuple[int, str, tuple[str, ...]]] = {
     "build-index": (8, "retrieval.index.build_index", ()),
     "validate-index": (8, "retrieval.index.validate_index", ()),
     "search": (8, "retrieval.index.search", ("question", "limit", "split")),
+    "answer": (9, "retrieval.qa.answer_query", ("question", "max_new_tokens")),
     "inspect-adapter": (10, "sources.ingestion.inspect_adapter", ("source_id",)),
     "adapter-schema": (10, "agri.phase_commands.show_adapter_schema", ("source_id",)),
     "ingest-snapshot": (10, "sources.ingestion.ingest_snapshot", ("source_id", "snapshot", "purpose")),
