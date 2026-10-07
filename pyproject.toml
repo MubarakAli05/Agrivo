@@ -10,5 +10,5 @@ requires-python = ">=3.10"
 dependencies = ["PyYAML>=6.0.2,<7"]
 
 [tool.setuptools]
-packages = ["agri"]
+packages = ["agri", "tokenizer"]
 py-modules = ["soil_tokenizer"]

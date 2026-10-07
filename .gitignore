@@ -27,5 +27,6 @@ dist/
 /tokenizer/vocab.json
 /tokenizer/merges.txt
 /tokenizer/config.json
+/tokenizer/releases/
 *.pt
 *.pth

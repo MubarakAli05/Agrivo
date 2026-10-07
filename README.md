@@ -1,6 +1,6 @@
 # AgriMini v0
 
-An agricultural AI **proof-of-working**, implemented in reviewed phases. **Phases 1–3 are implemented:** repository/configuration, non-destructive setup/status, a validated source/license registry, and tiny deterministic synthetic soil/plant-metadata/QA fixtures. Official source pages were inspected on 2026-10-07; no external datasets were ingested. Retrieval adapters, text tokenization, transformer training, image analysis, live question answering, and the dashboard are not implemented yet. There are no trained weights or model evaluation metrics.
+An agricultural AI **proof-of-working**, implemented in reviewed phases. **Phases 1–4 are implemented:** repository/configuration, non-destructive setup/status, a validated source/license registry, tiny synthetic soil/plant-metadata/QA fixtures, and custom text/structured tokenizers. Official source pages were inspected on 2026-10-07; no external datasets were ingested. Retrieval adapters, transformer training, image analysis, live question answering, and the dashboard are not implemented yet. There are no trained neural weights or model evaluation metrics.
 
 The existing soil tokenizer remains unchanged and usable independently (see below).
 
@@ -14,7 +14,7 @@ python -m agri.cli setup
 python -m agri.cli status
 python -m agri.cli inspect-sources
 python -m agri.cli inspect-sources --source soilgrids
-python -m unittest -v test_soil_tokenizer tests.test_phase1 tests.test_source_registry tests.test_synthetic_data
+python -m unittest discover -v
 ```
 
 Commands print JSON. RED (invalid/missing configuration or registry) returns exit code 1; GREEN and YELLOW return 0. YELLOW means metadata inspection succeeded but usage approval remains blocked, not that ingestion is permitted. Setup creates missing directories, [configuration](configs/agri-mini.json), and the source/license registry pair; it preserves existing files and rejects invalid content rather than replacing it. Status and inspection are read-only. For a separate data workspace, add `--root C:\path\to\workspace` to any command. The default root is the source checkout containing the `agri` package; these commands are intended to run from a source checkout.
@@ -27,7 +27,7 @@ The directory scaffold includes application/API/dashboard, raw/processed/indexed
 
 Setup never accesses the network, installs PyTorch, creates credentials, downloads datasets/checkpoints, or starts training. Later training phases must first report dataset size, storage, GPU memory, expected duration, checkpoint frequency, epochs, and data sufficiency, then pass a tiny dry run before any approved larger run. Source ingestion must wait for source inspection and license approval. Keep credentials out of configuration and version control.
 
-Available commands are `setup`, `status`, `inspect-sources`, `generate-synthetic`, and `validate-data`. Later commands are deliberately unavailable rather than returning simulated results. Status reports the Phase 1 layout gate, Phase 2 registry/review gate, and (when a release exists) Phase 3 fixture gate separately. Overall status remains YELLOW while external approvals are pending, even when Phase 3 is GREEN; none proves end-to-end model success.
+Available commands are `setup`, `status`, `inspect-sources`, `generate-synthetic`, `validate-data`, `train-tokenizer`, and `validate-tokenizer`. Later commands are deliberately unavailable rather than returning simulated results. Status reports layout, external-source review, fixture validation, and (when trained artifacts exist) tokenizer validation separately. Overall status remains YELLOW while external approvals are pending, even when Phases 3–4 are GREEN; none proves end-to-end model success.
 
 ## Phase 2: source registry
 
@@ -93,7 +93,67 @@ QA covers values, units, missingness, uncertainty, provenance, comparisons, sche
 
 [Fixture tests](tests/test_synthetic_data.py) cover determinism, global-RNG isolation, provenance, group splits, missingness/zeros, invalid schemas, UNKNOWN answers, immutable publication, corruption detection, CLI behavior, and read-only status. The fixture is intentionally below 1 MB and is not enough data to establish model quality.
 
-Next: review Phase 3, then Phase 4 (custom tokenizer). Fit vocabulary/numeric bins on **training records only**. The existing numeric tokenizer rejects all-missing training features; Phase 4 must explicitly handle the deliberate phosphorus case rather than invent values or fit on held-out records.
+Vocabulary, numeric boundaries, and categories must be fitted on **training records only**. Phase 4 handles all-missing phosphorus explicitly, without inventing observations or using held-out values.
+
+## Phase 4: custom text and structured tokenizers
+
+```powershell
+python -m agri.cli train-tokenizer --dry-run
+python -m agri.cli train-tokenizer
+python -m agri.cli validate-tokenizer
+python -m agri.cli status
+```
+
+Run setup and synthetic generation first on a fresh checkout. Training is offline, CPU-only, and dependency-free beyond existing workspace dependencies. The dry run uses four training QA examples, four training soil records, and at most 320 text tokens, writes nothing, and checks roundtrips. A normal training run always passes this preflight before fitting the 72 training QA examples and 16 training soil records. Validation/test records are used only for roundtrip/encoding checks, never learning. No neural model, optimizer, epochs, GPU, downloaded vocabulary, or pretrained weights are involved.
+
+### Text BPE
+
+[The custom byte BPE](tokenizer/tokenizer.py) normalizes CRLF/CR to LF and Unicode to NFC, retaining case and other whitespace. It starts with all 256 UTF-8 bytes plus explicit special tokens. Weighted adjacent-pair counts learn ranked merges with minimum frequency two and deterministic ID-pair tie breaks. Merges never cross documents or regex segments (letters, digits, punctuation, underscores, or whitespace). The configured vocabulary budget is an upper bound, not a promise to invent unsupported merges; Phase 4 accepts budgets from 267 to 8,192, default 2,048.
+
+Special IDs 0–10, in order: `<pad>`, `<unk>`, `<bos>`, `<eos>`, `<sep>`, `<mask>`, `<question>`, `<context>`, `<answer>`, `<unknown>`, `<source>`. Literal spellings inside user text are encoded as bytes—not interpreted as control IDs. [QA framing](tokenizer/train_tokenizer.py) inserts explicit BOS, question/context/answer delimiters, and EOS. Full byte coverage avoids unknown tokens for valid Unicode without learning from held-out text.
+
+```python
+from pathlib import Path
+from tokenizer.tokenizer import BPETokenizer
+
+path = Path("tokenizer") / "releases" / "agri-tokenizer-v1-seed42-vocab2048"
+text = BPETokenizer.load(path)
+question = "What is pH at 0–5 cm? 🌱"
+ids = text.encode(question)
+assert text.decode(ids) == text.normalize(question)
+```
+
+Roundtrips reproduce **normalized** text, not necessarily its original Unicode/newline representation. Lone surrogates are rejected. Decoding arbitrary IDs that form invalid UTF-8 raises `UnicodeDecodeError`; a future neural generation layer must handle incomplete byte sequences explicitly. Special tokens are skipped by default during decoding, or rendered literally with `skip_special_tokens=False`.
+
+### Structured soil encoding
+
+[StructuredSoilTokenizer](tokenizer/structured.py) is a new, separate implementation; the original [SoilTokenizer](soil_tokenizer.py) and its behavior remain unchanged. It learns feature-specific nearest-rank quantile bins and category vocabularies from rows explicitly marked `train`. Each record yields **41 ordered IDs**: numeric/unit/uncertainty-presence tokens for 12 fields, plus crop, region, source, source-version, and exact depth-range categories. The text and structured ID spaces are separate; Phase 5 must use separate embedding tables or an explicit offset scheme, not interchange their IDs.
+
+Every output also retains the exact raw value, unit, missingness, uncertainty interval/method, depth, and category/source values as side channels. Bin IDs alone are lossy and cannot reconstruct measurements; a later model must consume the numeric side channels rather than claiming bins are exact continuous values. Values outside the observed training range are flagged and retained, not clipped. The numeric `calibrated` flag means training observations exist for binning, not scientific or agronomic calibration. Units must match the canonical schema; no implicit conversions occur. Unknown categories and explicitly missing categories have distinct tokens.
+
+**All-missing phosphorus policy:** null retains its missing token. A future nonmissing value—including zero—is preserved and receives a distinct **uncalibrated** token, with no invented quantile boundaries or calibration claim. This is the selected policy; such inputs do not refit the tokenizer. The same rule applies to any all-missing feature.
+
+### Artifacts, validation, and limits
+
+[The training workflow](tokenizer/train_tokenizer.py) atomically publishes an immutable release under `tokenizer/releases/agri-tokenizer-v1-seed42-vocab2048/`:
+
+```text
+vocab.json       # explicit special IDs and hexadecimal byte-sequence IDs
+merges.txt       # version header and ranked ID pairs
+config.json      # BPE format and normalization settings
+structured.json # train-only quantiles, observed ranges, categories, units
+manifest.json   # training-input hashes, settings, source, timestamp, file hashes/sizes
+```
+
+Changing seed or vocabulary budget selects a separate release. Repeating training reuses a valid release without modifying bytes or timestamps. Corruption, missing/extra files, malformed artifacts, and provenance mismatches fail rather than being repaired. Status never trains or regenerates. Generated tokenizer files are Git-ignored; checked-in code and tests reproduce them. Byte outputs are deterministic for the same inputs/runtime; only independently created manifest timestamps differ. Unicode normalization/segmentation follows the Python runtime's Unicode database.
+
+Validation reports roundtrip failures, unknown IDs, sequence lengths, and examples exceeding the configured 256-token model context, per split. **Full QA contexts can exceed that budget. Nothing is silently truncated.** Passing these checks establishes tokenizer mechanics—not agronomic validity, model accuracy, or hallucination resistance. Context packing/chunking and numeric-side-channel consumption must be addressed before neural training.
+
+The validated seed-42 fixture release on Python 3.12 learns **760 text tokens** within the 2,048-token budget and **272 structured tokens**. All 108 QA examples roundtrip, but their fully framed sequences are 263–1,325 tokens, so **all exceed the current 256-token context budget**. Phase 5 must use the actual text vocabulary size (or mask unused output IDs), preserve the separate structured namespace, and explicitly address these overlong contexts.
+
+Tests cover byte BPE, deterministic merges, Unicode, special-token isolation, strict artifact loading, structured ranges/missingness/uncertainty, train-only fitting, dry runs, atomic publication, checksums, and CLI/status behavior.
+
+Next: review Phase 4, then Phase 5 (custom transformer). External ingestion approvals remain unchanged and independently blocked.
 
 ## Existing soil-health numeric tokenizer
 

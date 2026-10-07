@@ -9,6 +9,7 @@ from agri.source_registry import (
     LICENSE_PATH, SOURCE_PATH, initialize_registries, inspect_sources,
 )
 from agri.synthetic_data import release_path, validate_data
+from tokenizer.train_tokenizer import tokenizer_path, validate_tokenizer
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -112,4 +113,14 @@ def status(root: Path) -> dict[str, Any]:
             "next_required_step": dataset["next_required_step"],
         })
         report["resource_usage"]["storage"] = f"Synthetic release: {dataset['storage_bytes']} bytes; no model weights"
+    if config is not None and tokenizer_path(root).exists():
+        tokenizer = validate_tokenizer(root)
+        report.update({
+            "phase": 4, "phase4_status": tokenizer["status"],
+            "scope": tokenizer["scope"], "tokenizer": tokenizer,
+            "training": tokenizer["training"], "metrics": tokenizer["metrics"],
+            "next_required_step": tokenizer["next_required_step"],
+        })
+        report["resource_usage"]["cpu"] = "Tokenizer validation only; no neural training"
+        report["resource_usage"]["storage"] += f"; tokenizer artifacts: {tokenizer['storage_bytes']} bytes"
     return report
