@@ -1,6 +1,6 @@
 # AgriMini v0
 
-An agricultural AI **proof-of-working**, implemented in independently verified phases. **Phases 1–5, 8 and 10–12 are published:** repository/configuration, source/license registry, synthetic fixtures, custom tokenizers, a manually implemented transformer, and provenance-aware local retrieval. Remaining phases are being implemented in parallel and published separately after validation. Official source pages were inspected on 2026-10-07; no external datasets were ingested. Local retrieval is not neural answering or proof of agricultural accuracy.
+An agricultural AI **proof-of-working**, implemented in independently verified phases. **Phases 1–5, 8 and 10–13 are published:** repository/configuration, source/license registry, synthetic fixtures, custom tokenizers, a manually implemented transformer, and provenance-aware local retrieval. Remaining phases are being implemented in parallel and published separately after validation. Official source pages were inspected on 2026-10-07; no external datasets were ingested. Local retrieval is not neural answering or proof of agricultural accuracy.
 
 The existing soil tokenizer remains unchanged and usable independently (see below).
 
@@ -247,6 +247,12 @@ Use `inspect-adapter`, `adapter-schema`, and `ingest-snapshot` with `--source so
 Use the adapter commands with `--source data_gov`. [The adapter](sources/data_gov/__init__.py) accepts resource-specific area/production/yield rows as JSON records or CSV text **inside the same mandatory JSON metadata envelope**. Resource identity, district/crop/season/year, units and provenance remain explicit; the exported schema documents numeric parsing and conversions. It does not scrape the catalog or accept an unidentified CSV file as reviewed data.
 
 **YELLOW:** invented-fixture parser checks pass; real access, resource-specific terms and intended use remain blocked. No external data, fitting or GPU use; CPU/peak RAM were not measured. Next: review one specific resource and its rights/version, not the whole catalog.
+
+## Phase 13: SSURGO tabular snapshots
+
+Use the adapter commands with `--source ssurgo`. [The adapter](sources/ssurgo/__init__.py) validates explicit `mapunit` → `component` → `chorizon` joins, preserving component/horizon identities, units, depth, missingness and provenance. It does not average components or infer organic carbon from organic matter. Native archives/spatial queries are not supported.
+
+**YELLOW:** invented-fixture join/normalization tests pass; a reviewed pinned dataset and usage approval are still required. Real data quality is UNVERIFIED. No external data, model fitting or GPU use; CPU/peak RAM were not measured. Next: obtain source-specific approval before importing a prepared snapshot.
 
 ## Existing soil-health numeric tokenizer
 
