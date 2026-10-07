@@ -1,6 +1,6 @@
 # AgriMini v0
 
-An agricultural AI **proof-of-working**, implemented in independently verified phases. **Phases 1–5, 8 and 10 are published:** repository/configuration, source/license registry, synthetic fixtures, custom tokenizers, a manually implemented transformer, and provenance-aware local retrieval. Remaining phases are being implemented in parallel and published separately after validation. Official source pages were inspected on 2026-10-07; no external datasets were ingested. Local retrieval is not neural answering or proof of agricultural accuracy.
+An agricultural AI **proof-of-working**, implemented in independently verified phases. **Phases 1–5, 8 and 10–11 are published:** repository/configuration, source/license registry, synthetic fixtures, custom tokenizers, a manually implemented transformer, and provenance-aware local retrieval. Remaining phases are being implemented in parallel and published separately after validation. Official source pages were inspected on 2026-10-07; no external datasets were ingested. Local retrieval is not neural answering or proof of agricultural accuracy.
 
 The existing soil tokenizer remains unchanged and usable independently (see below).
 
@@ -235,6 +235,12 @@ python -m agri.cli ingest-snapshot --source plantvillage --snapshot C:\reviewed\
 `adapter-schema` exports the exact machine-readable envelope, columns, nested types, accepted units and limitations for each implemented source. Every snapshot is one UTF-8 JSON envelope containing `schema_version`, `source_id`, `dataset_id`, pinned `source_version`, reviewed `source_url`, timezone-qualified `retrieved_at`, `citations`, `license`, `data_origin`, `format`, and `records`. Unknown fields, ambiguous units and invented missing values are rejected. License metadata includes name, URL, attribution and upstream-rights notes. These declarations are not independent rights verification. Outputs retain original bytes and immutable checksummed lineage; they are not added to the synthetic training/retrieval release automatically.
 
 **YELLOW:** parser mechanics pass on invented test fixtures, but actual ingestion remains blocked (all ten sources disabled; all approvals pending). No real data, training or GPU was used. CPU/peak RAM were not measured. Next: source-specific dataset/version/rights review; never approve a catalog as a blanket dataset.
+
+## Phase 11: SoilGrids / ISRIC snapshots
+
+Use `inspect-adapter`, `adapter-schema`, and `ingest-snapshot` with `--source soilgrids` or `--source isric`. [SoilGrids](sources/soilgrids/__init__.py) and [ISRIC](sources/isric/__init__.py) normalize explicitly described point/profile layers, CRS, depth, units, uncertainty and missingness. Source-specific conversions are listed in the exported schema; unsupported units fail rather than being guessed. Native rasters, WCS downloads and live APIs are not implemented.
+
+**YELLOW:** fixture parser tests pass; actual acquisition/ingestion is blocked by dataset/version and intended-use review. Real soil quality is UNVERIFIED. No external data, model fitting or GPU use; CPU/peak RAM were not measured. Next: approve a specific pinned dataset and provide a reviewed snapshot.
 
 ## Existing soil-health numeric tokenizer
 

@@ -15,7 +15,7 @@ COMMANDS: dict[str, tuple[int, str, tuple[str, ...]]] = {
     "ingest-snapshot": (10, "sources.ingestion.ingest_snapshot", ("source_id", "snapshot", "purpose")),
 }
 
-ADAPTER_PHASES = {"plantvillage": 10, "plantdoc": 10}
+ADAPTER_PHASES = {"plantvillage": 10, "plantdoc": 10, "soilgrids": 11, "isric": 11}
 
 OPTIONS: dict[str, dict[str, Any]] = {
     "dry_run": {"action": "store_true", "help": "Run a bounded preflight without publishing artifacts"},
