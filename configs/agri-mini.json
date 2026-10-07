@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "project": "AgriMini-v0",
+  "seed": 42,
+  "offline": true,
+  "device": "cpu",
+  "model": {
+    "name": "AgriTransformer-v0",
+    "vocab_size": 2048,
+    "layers": 4,
+    "hidden_size": 256,
+    "attention_heads": 4,
+    "feed_forward_size": 1024,
+    "context_length": 256,
+    "dropout": 0.1,
+    "pretrained": false
+  },
+  "training": {
+    "dry_run": true,
+    "allow_large_runs": false,
+    "max_steps": 20,
+    "epochs": 1,
+    "batch_size": 2,
+    "checkpoint_every_steps": 10,
+    "learning_rate": 0.0003
+  }
+}

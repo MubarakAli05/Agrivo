@@ -1,0 +1,196 @@
+{
+  "schema_version": 1,
+  "licenses": {
+    "soilgrids": {
+      "source_url": "https://isric.org/explore/soilgrids",
+      "license": "CC-BY-4.0",
+      "status": "declared",
+      "scope": "dataset",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "evidence_urls": [
+        "https://isric.org/explore/soilgrids",
+        "https://docs.isric.org/globaldata/soilgrids/index.html",
+        "https://creativecommons.org/licenses/by/4.0/"
+      ],
+      "attribution_requirement": "Credit ISRIC and the source, link CC-BY-4.0, and indicate changes.",
+      "commercial_use": "allowed_with_conditions",
+      "redistribution": "allowed_with_conditions",
+      "notes": "Map license is declared by ISRIC. Intended-use review and snapshot pinning remain required.",
+      "approval": {
+        "status": "pending",
+        "intended_use": null,
+        "reviewer": null,
+        "reviewed_on": null
+      }
+    },
+    "isric": {
+      "source_url": "https://isric.org/explore",
+      "license": null,
+      "status": "unresolved",
+      "scope": "unknown",
+      "license_url": null,
+      "evidence_urls": [],
+      "attribution_requirement": null,
+      "commercial_use": "unknown",
+      "redistribution": "unknown",
+      "notes": "Dataset-specific terms require review.",
+      "approval": {
+        "status": "pending",
+        "intended_use": null,
+        "reviewer": null,
+        "reviewed_on": null
+      }
+    },
+    "ssurgo": {
+      "source_url": "https://www.nrcs.usda.gov/resources/data-and-reports/ssurgo-portal",
+      "license": null,
+      "status": "unresolved",
+      "scope": "unknown",
+      "license_url": null,
+      "evidence_urls": [],
+      "attribution_requirement": null,
+      "commercial_use": "unknown",
+      "redistribution": "unknown",
+      "notes": "No dataset-specific license verified from the inspected portal. Do not infer rights from federal hosting.",
+      "approval": {
+        "status": "pending",
+        "intended_use": null,
+        "reviewer": null,
+        "reviewed_on": null
+      }
+    },
+    "data_gov": {
+      "source_url": "https://data.gov.in/",
+      "license": null,
+      "status": "unresolved",
+      "scope": "unknown",
+      "license_url": null,
+      "evidence_urls": [],
+      "attribution_requirement": null,
+      "commercial_use": "unknown",
+      "redistribution": "unknown",
+      "notes": "Terms could not be read (HTTP 403); review the exact resource and intended use before approval.",
+      "approval": {
+        "status": "pending",
+        "intended_use": null,
+        "reviewer": null,
+        "reviewed_on": null
+      }
+    },
+    "plantvillage": {
+      "source_url": "https://github.com/spMohanty/PlantVillage-Dataset",
+      "license": "CC-BY-SA-3.0",
+      "status": "declared",
+      "scope": "dataset_distribution",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+      "evidence_urls": [
+        "https://github.com/spMohanty/PlantVillage-Dataset/blob/master/README_HF.md",
+        "https://creativecommons.org/licenses/by-sa/3.0/"
+      ],
+      "attribution_requirement": "Credit dataset authors, link CC-BY-SA-3.0, indicate changes; ShareAlike applies to adaptations.",
+      "commercial_use": "allowed_with_conditions",
+      "redistribution": "allowed_with_conditions",
+      "notes": "Repository README_HF.md declares cc-by-sa-3.0 (observed blob SHA e6add25de14e52cc3261690fe7d37d2da21ee71a). Confirm scope for the chosen files and intended use.",
+      "approval": {
+        "status": "pending",
+        "intended_use": null,
+        "reviewer": null,
+        "reviewed_on": null
+      }
+    },
+    "plantdoc": {
+      "source_url": "https://github.com/pratikkayal/PlantDoc-Dataset",
+      "license": "CC-BY-4.0",
+      "status": "declared",
+      "scope": "dataset",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "evidence_urls": [
+        "https://github.com/pratikkayal/PlantDoc-Dataset",
+        "https://github.com/pratikkayal/PlantDoc-Dataset/blob/master/LICENSE.txt",
+        "https://creativecommons.org/licenses/by/4.0/"
+      ],
+      "attribution_requirement": "Credit PlantDoc authors, link CC-BY-4.0, and indicate changes.",
+      "commercial_use": "allowed_with_conditions",
+      "redistribution": "allowed_with_conditions",
+      "notes": "Dataset README and LICENSE.txt declare CC-BY-4.0. This is not a guarantee of upstream image rights.",
+      "approval": {
+        "status": "pending",
+        "intended_use": null,
+        "reviewer": null,
+        "reviewed_on": null
+      }
+    },
+    "plant_pathology_2020": {
+      "source_url": "https://www.kaggle.com/c/plant-pathology-2020-fgvc7",
+      "license": null,
+      "status": "unresolved",
+      "scope": "unknown",
+      "license_url": null,
+      "evidence_urls": [],
+      "attribution_requirement": null,
+      "commercial_use": "unknown",
+      "redistribution": "unknown",
+      "notes": "Competition-specific rules must be readable and reviewed; public title is not usage permission.",
+      "approval": {
+        "status": "pending",
+        "intended_use": null,
+        "reviewer": null,
+        "reviewed_on": null
+      }
+    },
+    "plant_pathology_2021": {
+      "source_url": "https://www.kaggle.com/c/plant-pathology-2021-fgvc8",
+      "license": null,
+      "status": "unresolved",
+      "scope": "unknown",
+      "license_url": null,
+      "evidence_urls": [],
+      "attribution_requirement": null,
+      "commercial_use": "unknown",
+      "redistribution": "unknown",
+      "notes": "Competition-specific rules must be readable and reviewed; public title is not usage permission.",
+      "approval": {
+        "status": "pending",
+        "intended_use": null,
+        "reviewer": null,
+        "reviewed_on": null
+      }
+    },
+    "ai_challenger": {
+      "source_url": "https://github.com/AIChallenger/AIChallenger/tree/master/agriculture",
+      "license": null,
+      "status": "unresolved",
+      "scope": "unknown",
+      "license_url": null,
+      "evidence_urls": [],
+      "attribution_requirement": null,
+      "commercial_use": "unknown",
+      "redistribution": "unknown",
+      "notes": "Original source unavailable; neither data access nor license was verified.",
+      "approval": {
+        "status": "pending",
+        "intended_use": null,
+        "reviewer": null,
+        "reviewed_on": null
+      }
+    },
+    "kaggle_agriculture": {
+      "source_url": "https://www.kaggle.com/datasets?search=agriculture+plant+disease",
+      "license": null,
+      "status": "unresolved",
+      "scope": "unknown",
+      "license_url": null,
+      "evidence_urls": [],
+      "attribution_requirement": null,
+      "commercial_use": "unknown",
+      "redistribution": "unknown",
+      "notes": "Dataset-specific terms require review.",
+      "approval": {
+        "status": "pending",
+        "intended_use": null,
+        "reviewer": null,
+        "reviewed_on": null
+      }
+    }
+  }
+}

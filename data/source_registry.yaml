@@ -1,0 +1,213 @@
+schema_version: 1
+registry_version: 2026-10-07.1
+sources:
+  soilgrids:
+    name: ISRIC SoilGrids
+    type: soil_geospatial
+    url: https://isric.org/explore/soilgrids
+    enabled: false
+    priority: 3
+    access_modes:
+    - mode: rest
+      url: https://rest.isric.org/
+      status: paused
+      evidence_url: https://docs.isric.org/globaldata/soilgrids/index.html
+    - mode: webdav
+      url: https://files.isric.org/soilgrids/latest/data/
+      status: documented
+      evidence_url: https://docs.isric.org/globaldata/soilgrids/index.html
+    - mode: wcs
+      url: https://maps.isric.org/
+      status: documented
+      evidence_url: https://docs.isric.org/globaldata/soilgrids/index.html
+    - mode: wms
+      url: https://maps.isric.org/
+      status: documented
+      evidence_url: https://docs.isric.org/globaldata/soilgrids/index.html
+    source_version: null
+    inspection:
+      status: reviewed
+      inspected_on: '2026-10-07'
+      evidence_urls:
+      - https://isric.org/explore/soilgrids
+      - https://docs.isric.org/globaldata/soilgrids/index.html
+      notes: Official documentation reports REST temporarily paused with no restoration
+        date. WCS/WebDAV are alternatives; endpoints were not queried. Maps are estimates,
+        not local laboratory measurements. A latest URL is not a pinned data version.
+  isric:
+    name: ISRIC Data Resources
+    type: catalog
+    url: https://isric.org/explore
+    enabled: false
+    priority: 3
+    access_modes:
+    - mode: catalog
+      url: https://isric.org/explore
+      status: documented
+      evidence_url: https://isric.org/explore
+    source_version: null
+    inspection:
+      status: reviewed
+      inspected_on: '2026-10-07'
+      evidence_urls:
+      - https://isric.org/explore
+      notes: Resource catalog containing distinct datasets; do not inherit the SoilGrids
+        license for all ISRIC resources.
+  ssurgo:
+    name: USDA NRCS SSURGO
+    type: soil_survey
+    url: https://www.nrcs.usda.gov/resources/data-and-reports/ssurgo-portal
+    enabled: false
+    priority: 1
+    access_modes:
+    - mode: download
+      url: https://websoilsurvey.nrcs.usda.gov/app/WebSoilSurvey.aspx
+      status: documented
+      evidence_url: https://www.nrcs.usda.gov/resources/data-and-reports/ssurgo-portal
+    source_version: null
+    inspection:
+      status: reviewed
+      inspected_on: '2026-10-07'
+      evidence_urls:
+      - https://www.nrcs.usda.gov/resources/data-and-reports/ssurgo-portal
+      notes: Portal documents county/AOI spatial and tabular downloads, annual refreshes,
+        and incomplete survey areas. The portal application's no-license/no-account
+        statement is not a dataset usage license.
+  data_gov:
+    name: Government Open Data India
+    type: catalog
+    url: https://data.gov.in/
+    enabled: false
+    priority: 1
+    access_modes:
+    - mode: catalog
+      url: https://data.gov.in/
+      status: unverified
+      evidence_url: https://data.gov.in/
+    source_version: null
+    inspection:
+      status: restricted
+      inspected_on: '2026-10-07'
+      evidence_urls:
+      - https://data.gov.in/
+      - https://www.data.gov.in/government-open-data-license-india
+      notes: Landing page and license page returned HTTP 403 to this inspection. Resource-specific
+        API/download mechanisms and credentials remain unverified.
+  plantvillage:
+    name: PlantVillage
+    type: plant_vision
+    url: https://github.com/spMohanty/PlantVillage-Dataset
+    enabled: false
+    priority: 3
+    access_modes:
+    - mode: git
+      url: https://github.com/spMohanty/PlantVillage-Dataset
+      status: documented
+      evidence_url: https://github.com/spMohanty/PlantVillage-Dataset
+    source_version: null
+    inspection:
+      status: reviewed
+      inspected_on: '2026-10-07'
+      evidence_urls:
+      - https://github.com/spMohanty/PlantVillage-Dataset
+      - https://github.com/spMohanty/PlantVillage-Dataset/blob/master/README_HF.md
+      notes: Repository documents raw color/grayscale/segmented data and leaf grouping.
+        Preserve leaf identity when splitting. Dataset-card license declaration applies
+        to the described distribution; raw images have not been audited. No repository
+        commit is pinned.
+  plantdoc:
+    name: PlantDoc
+    type: plant_vision
+    url: https://github.com/pratikkayal/PlantDoc-Dataset
+    enabled: false
+    priority: 2
+    access_modes:
+    - mode: git
+      url: https://github.com/pratikkayal/PlantDoc-Dataset
+      status: documented
+      evidence_url: https://github.com/pratikkayal/PlantDoc-Dataset
+    source_version: null
+    inspection:
+      status: reviewed
+      inspected_on: '2026-10-07'
+      evidence_urls:
+      - https://github.com/pratikkayal/PlantDoc-Dataset
+      - https://github.com/pratikkayal/PlantDoc-Dataset/blob/master/LICENSE.txt
+      notes: Repository describes cropped classification data and links a separate
+        object-detection dataset. Images are described as internet-scraped; upstream
+        image rights need review.
+  plant_pathology_2020:
+    name: Plant Pathology 2020 FGVC7
+    type: plant_vision
+    url: https://www.kaggle.com/c/plant-pathology-2020-fgvc7
+    enabled: false
+    priority: 4
+    access_modes:
+    - mode: competition
+      url: https://www.kaggle.com/competitions/plant-pathology-2020-fgvc7
+      status: unverified
+      evidence_url: https://www.kaggle.com/competitions/plant-pathology-2020-fgvc7
+    source_version: null
+    inspection:
+      status: restricted
+      inspected_on: '2026-10-07'
+      evidence_urls:
+      - https://www.kaggle.com/competitions/plant-pathology-2020-fgvc7
+      - https://www.kaggle.com/competitions/plant-pathology-2020-fgvc7/rules
+      notes: Landing/rules pages returned only a title in this inspection. Competition
+        terms, access credentials, files, and data version remain unverified.
+  plant_pathology_2021:
+    name: Plant Pathology 2021 FGVC8
+    type: plant_vision
+    url: https://www.kaggle.com/c/plant-pathology-2021-fgvc8
+    enabled: false
+    priority: 4
+    access_modes:
+    - mode: competition
+      url: https://www.kaggle.com/competitions/plant-pathology-2021-fgvc8
+      status: unverified
+      evidence_url: https://www.kaggle.com/competitions/plant-pathology-2021-fgvc8
+    source_version: null
+    inspection:
+      status: restricted
+      inspected_on: '2026-10-07'
+      evidence_urls:
+      - https://www.kaggle.com/competitions/plant-pathology-2021-fgvc8
+      - https://www.kaggle.com/competitions/plant-pathology-2021-fgvc8/rules
+      notes: Landing/rules pages returned only a title in this inspection. Competition
+        terms, access credentials, files, and data version remain unverified.
+  ai_challenger:
+    name: AI Challenger agriculture
+    type: plant_vision
+    url: https://github.com/AIChallenger/AIChallenger/tree/master/agriculture
+    enabled: false
+    priority: 5
+    access_modes: []
+    source_version: null
+    inspection:
+      status: unavailable
+      inspected_on: '2026-10-07'
+      evidence_urls:
+      - https://github.com/AIChallenger/AIChallenger/tree/master/agriculture
+      notes: User-specified agriculture URL returned HTTP 404. No replacement source
+        was assumed.
+  kaggle_agriculture:
+    name: Kaggle agriculture/plant-disease discovery
+    type: catalog
+    url: https://www.kaggle.com/datasets?search=agriculture+plant+disease
+    enabled: false
+    priority: 5
+    access_modes:
+    - mode: catalog
+      url: https://www.kaggle.com/datasets?search=agriculture+plant+disease
+      status: unverified
+      evidence_url: https://www.kaggle.com/datasets?search=agriculture+plant+disease
+    source_version: null
+    inspection:
+      status: restricted
+      inspected_on: '2026-10-07'
+      evidence_urls:
+      - https://www.kaggle.com/datasets?search=agriculture+plant+disease
+      notes: Search page returned only a title. This is a discovery catalog, not an
+        approved dataset. Each selected dataset needs its own source ID, version,
+        and license review.
